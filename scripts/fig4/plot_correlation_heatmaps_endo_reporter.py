@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import napari
 
 
-path_to_data = '/home/jvanaret/data/data_paper_tapenade/correlation_staining_endogen'
+path_to_data = rf'C:\Users\gros\Desktop\DATA\data_delme'
 
 mask = tifffile.imread(
     f'{path_to_data}/mask.tif'
@@ -27,23 +27,23 @@ endogen = tifffile.imread(
     f'{path_to_data}/endo_iso.tif'
 )
 endogen = crop_array_using_mask(array=endogen, mask=mask.copy())
-reporter = tifffile.imread(
-    f'{path_to_data}/reporter_iso.tif'
+immunostained = tifffile.imread(
+    f'{path_to_data}/immunostained_iso.tif'
 )
-reporter = crop_array_using_mask(array=reporter, mask=mask.copy())
+immunostained = crop_array_using_mask(array=immunostained, mask=mask.copy())
 endogen_norm = tifffile.imread(
     f'{path_to_data}/endo_iso_normalized_12.tif'
 )
 endogen_norm = crop_array_using_mask(array=endogen_norm, mask=mask.copy())
-reporter_norm = tifffile.imread(
-    f'{path_to_data}/reporter_iso_normalized_12.tif'
+immunostained_norm = tifffile.imread(
+    f'{path_to_data}/immunostained_iso_normalized_12.tif'
 )
-# mask, reporter_norm, labels = crop_array_using_mask(
-#     image=reporter_norm, 
+# mask, immunostained_norm, labels = crop_array_using_mask(
+#     image=immunostained_norm, 
 #     mask=mask.copy(), 
 #     labels=labels
 # )
-reporter_norm = crop_array_using_mask(mask=mask, array=reporter_norm)
+immunostained_norm = crop_array_using_mask(mask=mask, array=immunostained_norm)
 labels = crop_array_using_mask(mask=mask, array=labels)
 mask = crop_array_using_mask(mask=mask, array=mask)
 
@@ -64,24 +64,24 @@ if True:
         min(np.percentile(endogen[mask],3), np.percentile(endogen_norm[mask],3)), 
         max(np.percentile(endogen[mask],97), np.percentile(endogen_norm[mask],97))
     )
-    min_max_reporter = (
-        min(np.percentile(reporter[mask],3), np.percentile(reporter_norm[mask],3)), 
-        max(np.percentile(reporter[mask],97), np.percentile(reporter_norm[mask],97))
+    min_max_immunostained = (
+        min(np.percentile(immunostained[mask],3), np.percentile(immunostained_norm[mask],3)), 
+        max(np.percentile(immunostained[mask],97), np.percentile(immunostained_norm[mask],97))
     )
 
     dapi_napari = np.where(mask, dapi, np.nan)
     endogen_napari = np.where(mask, endogen, np.nan)
-    reporter_napari = np.where(mask, reporter, np.nan)
+    immunostained_napari = np.where(mask, immunostained, np.nan)
     dapi_norm_napari = np.where(mask, dapi_norm, np.nan)
     endogen_norm_napari = np.where(mask, endogen_norm, np.nan)
-    reporter_norm_napari = np.where(mask, reporter_norm, np.nan)
+    immunostained_norm_napari = np.where(mask, immunostained_norm, np.nan)
 
     viewer.add_image(dapi_napari, name='dapi', contrast_limits=min_max_dapi, colormap='gray_r')
     viewer.add_image(dapi_norm_napari, name='dapi_norm', contrast_limits=min_max_dapi, colormap='gray_r')
     viewer.add_image(endogen_napari, name='endogen', contrast_limits=min_max_endogen, colormap='gray_r')
     viewer.add_image(endogen_norm_napari, name='endogen_norm', contrast_limits=min_max_endogen, colormap='gray_r')
-    viewer.add_image(reporter_napari, name='reporter', contrast_limits=min_max_reporter, colormap='gray_r')
-    viewer.add_image(reporter_norm_napari, name='reporter_norm', contrast_limits=min_max_reporter, colormap='gray_r')
+    viewer.add_image(immunostained_napari, name='immunostained', contrast_limits=min_max_immunostained, colormap='gray_r')
+    viewer.add_image(immunostained_norm_napari, name='immunostained_norm', contrast_limits=min_max_immunostained, colormap='gray_r')
 
     # viewer.add_image(mask, name='mask', colormap='gray', opacity=1)
 
@@ -176,11 +176,11 @@ def plot(X, Y, mask ,labels,
 
 ### FIRST FIGURE: No normalization, full img + 3 depths
 
-plot(endogen, reporter, mask, labels, 'Endogen signal (A.U)', 'Reporter signal (A.U)')
+plot(endogen, immunostained, mask, labels, 'Endogenous signal (A.U)', 'Immunostained signal (A.U)')
 
 
 # ### SECOND FIGURE: Normalization, full img + 3 depths
 
-plot(endogen_norm, reporter_norm, mask, labels, 'Endogen signal normalized (A.U)', 'Reporter signal normalized (A.U)')
+plot(endogen_norm, immunostained_norm, mask, labels, 'Endogenous signal normalized (A.U)', 'Immunostained signal normalized (A.U)')
 
 plt.show()
