@@ -1,12 +1,13 @@
 import numpy as np
 from tapenade.analysis.spatial_correlation import SpatialCorrelationPlotter
 from tapenade.preprocessing import crop_array_using_mask
+from tapenade.preprocessing._intensity_normalization import _normalize_intensity
 import tifffile
 import matplotlib.pyplot as plt
 import napari
 
 
-path_to_data = rf'C:\Users\gros\Desktop\DATA\data_delme'
+path_to_data = ...
 
 mask = tifffile.imread(
     f'{path_to_data}/mask.tif'
@@ -18,39 +19,30 @@ labels = tifffile.imread(
 dapi = tifffile.imread(
     f'{path_to_data}/dapi_before_norm.tif'
 )
-dapi = crop_array_using_mask(array=dapi, mask=mask.copy())
-dapi_norm = tifffile.imread(
-    f'{path_to_data}/dapi_iso_normalized_12.tif'
-)
-dapi_norm = crop_array_using_mask(array=dapi_norm, mask=mask.copy())
+
 endogen = tifffile.imread(
     f'{path_to_data}/endo_iso.tif'
 )
-endogen = crop_array_using_mask(array=endogen, mask=mask.copy())
 immunostained = tifffile.imread(
     f'{path_to_data}/immunostained_iso.tif'
 )
-immunostained = crop_array_using_mask(array=immunostained, mask=mask.copy())
-endogen_norm = tifffile.imread(
-    f'{path_to_data}/endo_iso_normalized_12.tif'
-)
-endogen_norm = crop_array_using_mask(array=endogen_norm, mask=mask.copy())
-immunostained_norm = tifffile.imread(
-    f'{path_to_data}/immunostained_iso_normalized_12.tif'
-)
+
+dapi_norm = _normalize_intensity(array = dapi, ref_array = dapi, mask = mask, labels = labels,image_wavelength=405,sigma=14)
+endogen_norm = _normalize_intensity(array = endogen, ref_array = endogen, mask = mask, labels = labels,image_wavelength=555,sigma=14)
+immunostained_norm = _normalize_intensity(array = immunostained, ref_array = immunostained, mask = mask, labels = labels,image_wavelength=555,sigma=14)
 # mask, immunostained_norm, labels = crop_array_using_mask(
 #     image=immunostained_norm, 
 #     mask=mask.copy(), 
 #     labels=labels
 # )
+dapi = crop_array_using_mask(array=dapi, mask=mask.copy())
+dapi_norm = crop_array_using_mask(array=dapi_norm, mask=mask.copy())
+endogen = crop_array_using_mask(array=endogen, mask=mask.copy())
+endogen_norm = crop_array_using_mask(array=endogen_norm, mask=mask.copy())
+immunostained = crop_array_using_mask(array=immunostained, mask=mask.copy())
 immunostained_norm = crop_array_using_mask(mask=mask, array=immunostained_norm)
 labels = crop_array_using_mask(mask=mask, array=labels)
 mask = crop_array_using_mask(mask=mask, array=mask)
-
-
-
-
-
 
 ### Napari
 if True:
@@ -177,10 +169,11 @@ def plot(X, Y, mask ,labels,
 ### FIRST FIGURE: No normalization, full img + 3 depths
 
 plot(endogen, immunostained, mask, labels, 'Endogenous signal (A.U)', 'Immunostained signal (A.U)')
+plt.savefig(rf'{path_to_data}\not_norm_correlation_heatmaps_endo_reporter.png')
 
 
 # ### SECOND FIGURE: Normalization, full img + 3 depths
 
-plot(endogen_norm, immunostained_norm, mask, labels, 'Endogenous signal normalized (A.U)', 'Immunostained signal normalized (A.U)')
-
+plot(endogen_norm, immunostained_norm, mask, labels, 'Endogenous signal normalized (A.U)', 'Immunostained signal \n normalized (A.U)')
+plt.savefig(rf'{path_to_data}\norm_correlation_heatmaps_endo_reporter.png')
 plt.show()
