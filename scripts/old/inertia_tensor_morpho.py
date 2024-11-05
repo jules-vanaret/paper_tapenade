@@ -4,7 +4,7 @@ import napari
 
 from puns.sparse_smoothing import gaussian_smooth_sparse
 from skimage.measure import regionprops
-from organoid.analysis._additional_regionprops_properties import (
+from tapenade.analysis.additional_regionprops_properties import (
     add_tensor_moment,
     add_tensor_inertia,
     add_principal_lengths,
@@ -12,7 +12,7 @@ from organoid.analysis._additional_regionprops_properties import (
 
 
 ### Import labels
-path_to_data = '/home/jvanaret/data/data_paper_valentin/morphology/processed'
+path_to_data = '/home/jvanaret/data/data_paper_tapenade/morphology/processed'
 
 index = 7
 

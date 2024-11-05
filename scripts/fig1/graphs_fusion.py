@@ -20,7 +20,7 @@ def density_from_labels(labels):
 
 
 
-path_to_data = '/data1/data_paper_valentin/1_vs_2_views/processed'
+path_to_data = '/data1/data_paper_tapenade/1_vs_2_views/processed'
 path_to_csv_one = f'{path_to_data}/results_one.csv'
 path_to_csv_two = f'{path_to_data}/results_two.csv'
 

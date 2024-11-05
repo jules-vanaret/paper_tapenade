@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 
 from stardist.models import StarDist3D
 from tqdm import tqdm
-from organoid.preprocessing.preprocessing import local_image_normalization
-from organoid.preprocessing.preprocessing import make_array_isotropic
+from tapenade.preprocessing import local_image_equalization
+from tapenade.preprocessing import change_arrays_pixelsize
 
 
-path_to_data = '/data1/data_paper_valentin/1_vs_2_views'
+path_to_data = '/data1/data_paper_tapenade/1_vs_2_views'
 
 one_view = tifffile.imread(f'{path_to_data}/iso.tif')
 one_view_mask = tifffile.imread(f'{path_to_data}/iso_mask.tif')
-one_view_norm = local_image_normalization(one_view, box_size=10, perc_low=1, perc_high=99, mask=one_view_mask)
+one_view_norm = local_image_equalization(one_view, box_size=10, perc_low=1, perc_high=99, mask=one_view_mask)
 
 
 # intensities = [np.median(one_view_z[mask_z]) for one_view_z, mask_z in zip(one_view, one_view_mask)]
@@ -21,7 +21,7 @@ one_view_norm = local_image_normalization(one_view, box_size=10, perc_low=1, per
 
 two_views = tifffile.imread(f'{path_to_data}/g2_dapi_fused.tif')
 two_views_mask = tifffile.imread(f'{path_to_data}/g2_dapi_fused_mask.tif')
-two_views_norm = local_image_normalization(two_views, box_size=10, perc_low=1, perc_high=99, mask=two_views_mask)
+two_views_norm = local_image_equalization(two_views, box_size=10, perc_low=1, perc_high=99, mask=two_views_mask)
 
 intensities2 = [np.median(two_views_z[mask_z]) for two_views_z, mask_z in zip(two_views, two_views_mask)]
 # intensities_norm2 = [np.median(two_views_norm_z[mask_z]) for two_views_norm_z, mask_z in zip(two_views_norm, two_views_mask)]
@@ -45,7 +45,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
 
 
     # isotropize to reach target object size
-    array = make_array_isotropic(image=array, zoom_factors=zoom_factors, order=1)
+    array = change_arrays_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
     print(array.min(), array.max())
 
     model = StarDist3D(None, name='lennedist_3d_grid222_rays64', basedir='/data1/lennedist_data/models')
@@ -64,7 +64,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
     # stretch by a factor of 2 in all dims to account for binning, plus 
     # initial zoom_factors
     second_zoom_factors = [1/zf for zf in zoom_factors]
-    labels = make_array_isotropic(labels, zoom_factors=second_zoom_factors, order=0)
+    labels = change_arrays_pixelsize(labels, zoom_factors=second_zoom_factors, order=0)
 
     return labels
 

@@ -1,0 +1,65 @@
+S_dapi(x) = 1(x in nucleus) * G_dapi(x) * O(x) + uncorrelated noise
+S_gene(x) = 1(x in instance) * G_gene(x) * O(x) + uncorrelated noise
+
+Hypotheses:
+    - G_dapi(x) = G0 = cst, with mesoscale gradients
+    - D_sigma[S_dapi][mfv=1(x in nucleus), mask=mask] = S_dapi' =  G0 * O(x)
+    - S_gene / S_dapi' = S_gene' = 1(x in instance) * G_gene(x)/G0 + noise / (G0*0(x))
+    - SNR before = G_gene * 0 / eps
+    - amplitude of noise after = G_gene/G0 / eps/(G0*O) = G_gene*O / eps
+
+S_dapi'' = S_dapi' / G0 * median(S_dapi in brightest planes)
+S_gene'' = S_gene' / median(S_gene' in brightest S_dapi' planes) * median(S_gene in brightest S_dapi planes)
+
+
+
+Quantifying gene expression in 3D tissue samples is hindered by various sources of noise and artifacts that induce large scale intensity gradients in the signals.
+The main sources of artifacts are local variations in optical paths and cell density,that usually manifest as decreased intensities towards deep regions of the tissue. 
+Artifactual gradients can also appear during the registration of two non-colinear views, which complexifies the expected distribution of artifacts.
+
+We model the intensity signal $I(\vec{x})$ from a given channel as
+
+\begin{equation}
+    I(\vec{x}) = M_{instance}(\vec{x}) S(\vec{x}) A(\vec{x}) + \varepsilon(\vec{x})
+\end{equation}
+
+where $M_{instance}(\vec{x})$ is the mask of the instance, i.e $M_{instance}(\vec{x}) = 1$ if $\vec{x}$ is in the instance and $0$ otherwise, $S(\vec{x})$ is the gene expression field, which provides a continuous view of the cell-scale variations of the biological signal, $A(\vec{x})$ is the field representing the large scale artifactual intensity variations, and $\varepsilon(\vec{x})$ is an additive uncorrelated noise term which models both small scale variations in the signal and acquisition noise.\\
+
+We hypothesize that (i) the Hoechst signal $S_{h}(\vec{x})$ should be globally homogeneous throughout the volume, i.e $S_{h}(\vec{x}) = S_h^0$, and that the artifactual field $A$ (ii) is equivalent in all channels and (iii) has large scale variations.
+From these assumptions, we develop a correction scheme based on the Hoechst staining to separate the contribution of artifactual gradients from true gradients in gene expression.
+We first compute the gaussian average of the Hoechst signal at a scale $\sigma$ (the choice of $\sigma$ is discussed below) using equation \eqref{XXX}, in which we keep only pixel instensities that belong to the instance mask.
+\begin{equation}
+    D_{\sigma}[I_{h}][mfv=M_{instance}, mask=M](\vec{x}) = I'_{h}(\vec{x}) \approx S_h^0 A(\vec{x})
+\end{equation}
+
+We then normalize other biologically relevant intensity signals $I_b$ by the gaussian-averaged Hoechst field to get
+\begin{equation}
+    I_b'(\vec{x}) = \frac{I_b(\vec{x})}{S'_{h}(\vec{x})} = M_{instance}(\vec{x}) \frac{S(\vec{x})}{S_h^0} + \varepsilon'(\vec{x})
+\end{equation}
+This step effectively removes the artifactual field from the signal.
+The choice of $\sigma$ used for the gaussian averagin of the Hoechst signal depends on the lengthscale at which the field of artifacts $A$ varies. 
+Since this is not known in practice, we choose in our implementation the value $\sigma$ that leads to the most homogeneous normalized Hoechst signal. 
+Formally, let $\mathbf{I}_{h} = \{ \text{median} I_{h}(z=Z) \}_{Z=0, Z_{max}}$, we choose $\sigma = \argmin_\sigma \text{MAD} \left( \mathbf{I}_{h} \right)$, with $\text{MAD}$ the median absolute deviation.\\
+
+With the aim of comparing normalized signals across different samples acquired with the same imaging setup, we further rescale the normalized signal by a global multiplicative factor.
+We multiply each normalized signal by multiplicative factor such that the median intensity of the normalized Hoechst signal computed in a region of brightest intensity corresponds to the median intensity of the raw Hoechst signal.
+The rationale is that the latter reflects the expected intensity in the absence of artifacts.
+
+
+
+
+
+In all acquired data, although we would expect a globally homogeneous signal in nuclei intensities, we observe large-scale spatial heterogeneities in the Hoechst signal. These gradients are attributed to variations in optical paths and cell density, or to artifacts induced by the registration of 2 non-colinear views. We consider that the other channels, representing intensities of expression for various genes, show intensity gradients due to two distinct reasons : i) gradients in gene expression and ii) artificial gradients due to unwanted effects. 
+To correct for effects ii) and be able to analyze signal i) only, we develop a correction scheme based on the Hoechst staining.
+
+
+
+
+
+
+We hypothesize that the artificial gradients are equivalent in all channels, so we can compute intensity gradients in channel of nuclei signal and correct by this factor the other channels of the same sample.
+Also, we consider that nuclei intensities are globally homogeneous throughout the volume, although we do not consider nuclei-scale variations purely due to DNA localization (?), but rather tissue-scale intensity gradients. Based on these assumptions, we compute large-scale gradients in nuclei intensities, and we correct the signal in other channels by rescaling them by this large-scale gradient.
+
+Technically, we use the 3D segmentation masks from the Hoechst signal, keeping the intensities coming only from the nuclei, rejecting the eventual background noise. We apply a convolution using a gaussian kernel \eqref{smoothing} of standard deviation 15µm to extract large-scale variations of intensities, which gives us a field of nuclei intensities (cite fig). We then divide the signal from other channels by this field, and apply a multiplicative factor so that the median intensity of the normalized signal corresponds to the median intensity of the raw signal computed in a region of brightest intensity.
+
+The result signal has enhanced intensities in deep regions towards the middle and decreased intensities near the border. This correction scheme is applied separately for each sample.

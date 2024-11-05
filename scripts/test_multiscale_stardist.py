@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 from stardist.models import StarDist3D
 from tqdm import tqdm
-from organoid.preprocessing.preprocessing import local_image_normalization
-from organoid.preprocessing.preprocessing import make_array_isotropic
+from tapenade.preprocessing import local_image_equalization
+from tapenade.preprocessing import change_arrays_pixelsize
 from skimage.transform import resize
 
 
@@ -29,7 +29,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
 
     # isotropize to reach target object size
     if not all(zf == 1 for zf in zoom_factors):
-        array = make_array_isotropic(image=array, zoom_factors=zoom_factors, order=1)
+        array = change_arrays_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
     print(array.min(), array.max())
 
     model = StarDist3D(None, name='lennedist_3d_grid222_rays64', basedir='/data1/lennedist_data/models')
@@ -49,7 +49,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
     # initial zoom_factors
     if not all(zf == 1 for zf in zoom_factors):
         second_zoom_factors = [1/zf for zf in zoom_factors]
-        labels = make_array_isotropic(labels, zoom_factors=second_zoom_factors, order=0)
+        labels = change_arrays_pixelsize(labels, zoom_factors=second_zoom_factors, order=0)
 
     return labels
 

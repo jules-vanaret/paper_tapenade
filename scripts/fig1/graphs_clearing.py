@@ -25,7 +25,7 @@ def density_from_labels(labels):
 
 
 
-path_to_data = '/data1/data_paper_valentin/dapi_stacks_high_magn/processed'
+path_to_data = '/data1/data_paper_tapenade/dapi_stacks_high_magn/processed'
 
 media = ['water', 'optiprep', 'gold', 'glycerol']
 
