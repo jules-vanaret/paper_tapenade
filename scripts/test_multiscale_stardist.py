@@ -1,6 +1,7 @@
 import numpy as np
 import tifffile
 from tifffile import TiffFile
+
 # import napari
 import matplotlib.pyplot as plt
 
@@ -11,8 +12,6 @@ from tapenade.preprocessing import change_arrays_pixelsize
 from skimage.transform import resize
 
 
-
-
 def predict_lennedist(array, zoom_factors, normalize=False):
 
     is_temporal = array.ndim == 4
@@ -20,11 +19,13 @@ def predict_lennedist(array, zoom_factors, normalize=False):
     if normalize:
         if is_temporal:
             perc_low, perc_high = np.percentile(array, (1, 99), axis=(1, 2, 3))
-            array = (array - perc_low[:, None, None, None]) / (perc_high - perc_low)[:, None, None, None]
+            array = (array - perc_low[:, None, None, None]) / (perc_high - perc_low)[
+                :, None, None, None
+            ]
         else:
             perc_low, perc_high = np.percentile(array, (1, 99))
             array = (array - perc_low) / (perc_high - perc_low)
-        
+
         array = np.clip(array, 0, 1)
 
     # isotropize to reach target object size
@@ -32,8 +33,10 @@ def predict_lennedist(array, zoom_factors, normalize=False):
         array = change_arrays_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
     print(array.min(), array.max())
 
-    model = StarDist3D(None, name='lennedist_3d_grid222_rays64', basedir='/data1/lennedist_data/models')
-    model.config.use_gpu=True
+    model = StarDist3D(
+        None, name="lennedist_3d_grid222_rays64", basedir="/data1/lennedist_data/models"
+    )
+    model.config.use_gpu = True
 
     if is_temporal:
         labels = np.zeros(array.shape, dtype=np.uint16)
@@ -45,39 +48,40 @@ def predict_lennedist(array, zoom_factors, normalize=False):
     else:
         labels, _ = model.predict_instances(array, n_tiles=model._guess_n_tiles(array))
 
-    # stretch by a factor of 2 in all dims to account for binning, plus 
+    # stretch by a factor of 2 in all dims to account for binning, plus
     # initial zoom_factors
     if not all(zf == 1 for zf in zoom_factors):
-        second_zoom_factors = [1/zf for zf in zoom_factors]
-        labels = change_arrays_pixelsize(labels, zoom_factors=second_zoom_factors, order=0)
+        second_zoom_factors = [1 / zf for zf in zoom_factors]
+        labels = change_arrays_pixelsize(
+            labels, zoom_factors=second_zoom_factors, order=0
+        )
 
     return labels
 
-path_to_data = '/data1/project_egg/raw/fusion3'
-data = tifffile.imread(f'{path_to_data}/rescaled_normalized_t30.tif')
+
+path_to_data = "/data1/project_egg/raw/fusion3"
+data = tifffile.imread(f"{path_to_data}/rescaled_normalized_t30.tif")
 shape = data.shape
 
 # rescale_factors = [1/3, 1/2.5, 1/2, 1/1.5, 1, 1.5, 2, 2.5, 3]
-rescale_factors = np.logspace(np.log10(1/2), np.log10(2), 9)
+rescale_factors = np.logspace(np.log10(1 / 2), np.log10(2), 9)
 
 
 all_labels = np.zeros((len(rescale_factors), *shape), dtype=np.uint16)
 
 
+for i, f in enumerate(rescale_factors):
 
-for i,f in enumerate(rescale_factors):
-
-    new_shape = [int(s*f) for s in shape]
+    new_shape = [int(s * f) for s in shape]
     print(shape, new_shape)
 
     image = resize(data, new_shape, order=1, preserve_range=True)
 
-    labels_norm = predict_lennedist(image, (1,1,1), normalize=False)
+    labels_norm = predict_lennedist(image, (1, 1, 1), normalize=False)
 
     labels_norm = resize(labels_norm, shape, order=0, preserve_range=True)
 
     all_labels[i] = labels_norm
 
 
-tifffile.imwrite(f'{path_to_data}/multiscale_stardist_labels2.tif', all_labels)
-
+tifffile.imwrite(f"{path_to_data}/multiscale_stardist_labels2.tif", all_labels)

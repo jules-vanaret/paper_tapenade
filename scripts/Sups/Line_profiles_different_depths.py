@@ -1,9 +1,10 @@
-# plot intensity profile in a XY plane for Hoechst and T-Bra, normalized and non normalized
+# plot intensity profile in a XY plane for Hoechst and T-Bra, normalized. we look a different planes to check (for dapi) if there is no decrease in z.
 
 import tifffile
 import napari
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import ndimage as ndi
 from tapenade.preprocessing._preprocessing import (
     change_array_pixelsize,
     normalize_intensity,
@@ -21,10 +22,6 @@ def save_fig(data, folder, cmap, vmin, vmax):
 
 
 def plot_profile(im2D, mask):
-    """
-    Plot the intensity profile along the y axis of an image, with a 60 pixels width around the midline
-
-    """
     ymid = im2D.shape[0] // 2
     midline_region = slice(ymid - 30, ymid + 30)  # 60 µm around the midline
     masked_image = np.where(
@@ -43,13 +40,13 @@ colors_hoechst = ["#B5DDD8", "#81C4E7", "#9398D2", "#906388", "#684957"]
 scale = (1, 0.6, 0.6)
 sigma_plot = 30
 sigma_norm = 11
-
+dz = 5  # half thickness of each subvolume around the slices
 visualize_napari = False
 im = tifffile.imread(rf"{folder}\data\1.tif")
 mask = (tifffile.imread(rf"{folder}\masks\1.tif")).astype(bool)
 seg = tifffile.imread(rf"{folder}\segmentation\1.tif")
 hoechst = im[:, 0, :, :]
-bra = im[:, 2, :, :]
+bra = im[:, 3, :, :]
 
 hoechst_iso = change_array_pixelsize(array=hoechst, input_pixelsize=scale)
 bra_iso = change_array_pixelsize(array=bra, input_pixelsize=scale)
@@ -61,6 +58,7 @@ bra_norm = normalize_intensity(
     mask=mask_iso,
     labels=seg_iso,
     sigma=sigma_norm,
+    image_wavelength=555,
 )
 hoechst_norm = normalize_intensity(
     image=hoechst_iso,
@@ -68,6 +66,7 @@ hoechst_norm = normalize_intensity(
     mask=mask_iso,
     labels=seg_iso,
     sigma=sigma_norm,
+    image_wavelength=405,
 )
 
 hoechst_smooth = _masked_smooth_gaussian(
@@ -86,30 +85,29 @@ if visualize_napari:
 fig, ax = plt.subplots(2, 2, figsize=(15, 9))
 
 for ind_z, z in enumerate([50, 100, 150, 200]):
-    bra_norm_2D = bra_norm[z]
-    hoechst_norm_2D = hoechst_norm[z]
-    mask_2D = mask_iso[z]
-    seg_2D = seg_iso[z]
-    bra_2D = bra_iso[z]
-    hoechst_2D = hoechst_iso[z]
+    # averaging few slices around z
+    bra_norm_2D = np.mean(bra_norm[z - dz : z + dz], axis=0)
+    hoechst_norm_2D = np.mean(hoechst_norm[z - dz : z + dz], axis=0)
+    mask_2D = np.mean(mask_iso[z - dz : z + dz], axis=0).astype(bool)
+    bra_2D = np.mean(bra_iso[z - dz : z + dz], axis=0)
+    hoechst_2D = np.mean(hoechst_iso[z - dz : z + dz], axis=0)
+    bra_norm_2D[np.isnan(bra_norm_2D)] = 0
+    hoechst_norm_2D[np.isnan(hoechst_norm_2D)] = 0
 
     # save_fig(bra_2D,rf'{folder}\bra_2D.svg','gray_r',0,300)
     # save_fig(hoechst_2D,rf'{folder}\hoechst_2D.svg','gray_r',0,300)
     # save_fig(bra_norm_2D,rf'{folder}\bra_norm_2D.svg','gray_r',0,500)
     # save_fig(hoechst_norm_2D,rf'{folder}\hoechst_norm_2D.svg','gray_r',0,500)
-    # save_fig(hoechst_smooth[z],rf'{folder}\hoechst_smooth.svg','turbo',0,200)
 
     bra_norm_gauss = _masked_smooth_gaussian(
-        bra_norm_2D, sigmas=sigma_plot, mask_for_volume=seg_2D, mask=mask_2D
+        array=bra_norm_2D, mask=mask_2D, sigmas=sigma_plot
     )
     hoechst_norm_gauss = _masked_smooth_gaussian(
-        hoechst_norm_2D, sigmas=sigma_plot, mask_for_volume=seg_2D, mask=mask_2D
+        array=hoechst_norm_2D, mask=mask_2D, sigmas=sigma_plot
     )
-    bra_gauss = _masked_smooth_gaussian(
-        bra_2D, sigmas=sigma_plot, mask_for_volume=seg_2D, mask=mask_2D
-    )
+    bra_gauss = _masked_smooth_gaussian(array=bra_2D, mask=mask_2D, sigmas=sigma_plot)
     hoechst_gauss = _masked_smooth_gaussian(
-        hoechst_2D, sigmas=sigma_plot, mask_for_volume=seg_2D, mask=mask_2D
+        array=hoechst_2D, mask=mask_2D, sigmas=sigma_plot
     )
 
     line_bra_norm = plot_profile(bra_norm_gauss, mask=mask_2D)

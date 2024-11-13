@@ -68,7 +68,7 @@ def radial_intensities_one_image(
         signal_masked[layer_and_nucl_mask == 0] = np.nan
         # viewer.add_image(signal_masked)
         Intensity.append(np.nanmean(signal_masked))
-        if return_df :
+        if return_df:
             radial_pos = ind / number_layers
             df = df._append(
                 {
@@ -78,7 +78,7 @@ def radial_intensities_one_image(
                 },
                 ignore_index=True,
             )
-    if return_df :
+    if return_df:
         return df
     else:
         return Intensity
@@ -129,6 +129,7 @@ def compute_df_fromfolder(
         df = pd.concat([df, radial_distrib])
     return df
 
+
 scale = (1, 0.6, 0.6)
 number_layers = 5
 
@@ -153,7 +154,7 @@ df_2 = compute_df_fromfolder(
     sigma=25,
     number_layers=number_layers,
 )
-#if needed to add another dataset to one of the previous dataframes
+# if needed to add another dataset to one of the previous dataframes
 # df_2 = compute_df_fromfolder(folder_data = path_dataset3+'\data',folder_masks = path_dataset3+'\masks',folder_seg=path_dataset3+'\segmentation',df=df_2,scale=scale,sigma=25,number_layers=5)
 
 fig = plt.figure(figsize=(14, 10))

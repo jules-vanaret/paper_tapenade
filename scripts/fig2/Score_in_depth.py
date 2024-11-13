@@ -12,6 +12,7 @@ from skimage import io
 from scipy.optimize import linear_sum_assignment
 import napari
 from skimage.measure import regionprops
+
 io.use_plugin("pil")
 
 

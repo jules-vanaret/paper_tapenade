@@ -11,8 +11,8 @@ from skimage import io
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import regionprops
 import napari
-io.use_plugin("pil")
 
+io.use_plugin("pil")
 
 
 def build_iou_matrix(gt_segmentation, pred_segmentation):

@@ -1,6 +1,7 @@
 import numpy as np
 import tifffile
 from tifffile import TiffFile
+
 # import napari
 import matplotlib.pyplot as plt
 
@@ -10,8 +11,6 @@ from tapenade.preprocessing import local_image_equalization
 from tapenade.preprocessing import change_arrays_pixelsize
 
 
-
-
 def predict_lennedist(array, zoom_factors, normalize=False):
 
     is_temporal = array.ndim == 4
@@ -19,11 +18,13 @@ def predict_lennedist(array, zoom_factors, normalize=False):
     if normalize:
         if is_temporal:
             perc_low, perc_high = np.percentile(array, (1, 99), axis=(1, 2, 3))
-            array = (array - perc_low[:, None, None, None]) / (perc_high - perc_low)[:, None, None, None]
+            array = (array - perc_low[:, None, None, None]) / (perc_high - perc_low)[
+                :, None, None, None
+            ]
         else:
             perc_low, perc_high = np.percentile(array, (1, 99))
             array = (array - perc_low) / (perc_high - perc_low)
-        
+
         array = np.clip(array, 0, 1)
 
     # isotropize to reach target object size
@@ -31,8 +32,10 @@ def predict_lennedist(array, zoom_factors, normalize=False):
         array = change_arrays_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
     print(array.min(), array.max())
 
-    model = StarDist3D(None, name='lennedist_3d_grid222_rays64', basedir='/data1/lennedist_data/models')
-    model.config.use_gpu=True
+    model = StarDist3D(
+        None, name="lennedist_3d_grid222_rays64", basedir="/data1/lennedist_data/models"
+    )
+    model.config.use_gpu = True
 
     if is_temporal:
         labels = np.zeros(array.shape, dtype=np.uint16)
@@ -45,25 +48,26 @@ def predict_lennedist(array, zoom_factors, normalize=False):
         labels, _ = model.predict_instances(array, n_tiles=model._guess_n_tiles(array))
 
     if not all(zf == 1 for zf in zoom_factors):
-        second_zoom_factors = [1/zf for zf in zoom_factors]
-        labels = change_arrays_pixelsize(labels, zoom_factors=second_zoom_factors, order=0)
+        second_zoom_factors = [1 / zf for zf in zoom_factors]
+        labels = change_arrays_pixelsize(
+            labels, zoom_factors=second_zoom_factors, order=0
+        )
 
     return labels
 
-path_to_data = '/data1/data_paper_tapenade/morphology/processed'
+
+path_to_data = "/data1/data_paper_tapenade/morphology/processed"
 
 
-
-for i in range(5,9):
+for i in range(5, 9):
     # with TiffFile(f'{path_to_data}/ag{i}.lsm') as tif:
-        # print(
-            # tif.lsm_metadata['VoxelSizeZ']*1e6,
-            # tif.lsm_metadata['VoxelSizeY']*1e6,
-            # tif.lsm_metadata['VoxelSizeX']*1e6
-        # )
-        # image = tif.asarray()[:,0]
+    # print(
+    # tif.lsm_metadata['VoxelSizeZ']*1e6,
+    # tif.lsm_metadata['VoxelSizeY']*1e6,
+    # tif.lsm_metadata['VoxelSizeX']*1e6
+    # )
+    # image = tif.asarray()[:,0]
 
-    image_norm = tifffile.imread(f'{path_to_data}/ag{i}_norm.tif')
-    labels_norm = predict_lennedist(image_norm, (1,1,1), normalize=False)
-    tifffile.imwrite(f'{path_to_data}/ag{i}_norm_labels.tif', labels_norm)
-
+    image_norm = tifffile.imread(f"{path_to_data}/ag{i}_norm.tif")
+    labels_norm = predict_lennedist(image_norm, (1, 1, 1), normalize=False)
+    tifffile.imwrite(f"{path_to_data}/ag{i}_norm_labels.tif", labels_norm)

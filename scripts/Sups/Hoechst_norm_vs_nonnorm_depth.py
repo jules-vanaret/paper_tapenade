@@ -8,6 +8,8 @@ from tapenade.preprocessing._preprocessing import (
     change_array_pixelsize,
     normalize_intensity,
 )
+from tapenade.preprocessing._smoothing import _masked_smooth_gaussian
+
 
 def save_fig(data, path_fig, cmap, vmin, vmax):
     """
@@ -27,26 +29,28 @@ def save_fig(data, path_fig, cmap, vmin, vmax):
 
 
 folder = ...
-
-im = tifffile.imread(rf"{folder}\data\1.tif")
-mask = (tifffile.imread(rf"{folder}\masks\1.tif")).astype(bool)
-seg = tifffile.imread(rf"{folder}\segmentation\1_seg.tif")
+name = "2"
+im = tifffile.imread(rf"{folder}\data\{name}.tif")
+mask = (tifffile.imread(rf"{folder}\masks\{name}.tif")).astype(bool)
+seg = tifffile.imread(rf"{folder}\segmentation\{name}.tif")
 hoechst = im[:, 0, :, :]
 
-z = 150
 sigma = 20
 scale = (1, 0.6, 0.6)
 
 hoechst_iso = change_array_pixelsize(array=hoechst, input_pixelsize=scale)
 mask_iso = change_array_pixelsize(array=mask, input_pixelsize=scale, order=0)
 seg_iso = change_array_pixelsize(array=seg, input_pixelsize=scale, order=0)
+
 hoechst_norm = normalize_intensity(
     image=hoechst_iso,
     ref_image=hoechst_iso,
     mask=mask_iso.astype(bool),
     labels=seg_iso,
     sigma=sigma,
+    image_wavelength=405,
 )
+
 hoechst_nan = np.where(mask_iso == 1, hoechst_iso, np.nan).astype(float)
 
 Int_hoechst_non_norm = []
@@ -54,6 +58,8 @@ Int_hoechst_norm = []
 for z in range(len(mask)):
     Int_hoechst_non_norm.append(np.nanmedian(hoechst_nan[z, :, :]))
     Int_hoechst_norm.append(np.nanmedian(hoechst_norm[z, :, :]))
+Int_hoechst_non_norm = [i for i in Int_hoechst_non_norm if np.isnan(i) == False]
+Int_hoechst_norm = [i for i in Int_hoechst_norm if np.isnan(i) == False]
 
 fig, ax = plt.subplots(1, figsize=(10, 7))
 
@@ -68,10 +74,9 @@ ax.plot(
 
 ax.set_xlabel("Depth (µm)", fontsize=30)
 ax.set_ylabel("Median intensity in \n Hoechst (A.U)", fontsize=30)
-ax.set_xticks([0, 100, 200, 300])
 ax.tick_params(axis="y", labelsize=30)
 ax.tick_params(axis="x", labelsize=30)
 ax.legend(fontsize=25)
 plt.legend()
 plt.show()
-fig.savefig(rf"{folder}\zprofile.svg")
+fig.savefig(rf"{folder_fig}\zprofile_{name}.svg")

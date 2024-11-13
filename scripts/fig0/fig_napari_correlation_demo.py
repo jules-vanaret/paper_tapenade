@@ -7,31 +7,21 @@ import napari
 from tapenade.preprocessing import masked_gaussian_smooth_dense_two_arrays_gpu
 
 
-path_to_data = '/home/jvanaret/data/data_paper_tapenade/data_fig_correlation_fig_napari/processed/'
-
-mask = tifffile.imread(
-    f'{path_to_data}/mask.tif'
+path_to_data = (
+    "/home/jvanaret/data/data_paper_tapenade/data_fig_correlation_fig_napari/processed/"
 )
 
-labels = tifffile.imread(
-    f'{path_to_data}/labels.tif'
-)
-dapi = tifffile.imread(
-    f'{path_to_data}/dapi isotropized equalized.tif'
-)
+mask = tifffile.imread(f"{path_to_data}/mask.tif")
 
-bra = tifffile.imread(
-    f'{path_to_data}/normalized/bra isotropized normalized.tif'
-)
+labels = tifffile.imread(f"{path_to_data}/labels.tif")
+dapi = tifffile.imread(f"{path_to_data}/dapi isotropized equalized.tif")
 
-ecad = tifffile.imread(
-    f'{path_to_data}/normalized/ecad isotropized normalized.tif'
-)
+bra = tifffile.imread(f"{path_to_data}/normalized/bra isotropized normalized.tif")
+
+ecad = tifffile.imread(f"{path_to_data}/normalized/ecad isotropized normalized.tif")
 
 mask_nuclei = labels.astype(bool)
 mask_membranes = np.where(mask, ~mask_nuclei, False)
-
-
 
 
 bra_smoothed, ecad_smoothed = masked_gaussian_smooth_dense_two_arrays_gpu(
@@ -42,7 +32,6 @@ bra_smoothed, ecad_smoothed = masked_gaussian_smooth_dense_two_arrays_gpu(
 )
 
 
-
 ### Napari
 if True:
     viewer = napari.Viewer()
@@ -50,42 +39,41 @@ if True:
     bra_napari = np.where(mask, bra, np.nan)
     ecad_napari = np.where(mask, ecad, np.nan)
 
-    viewer.add_image(dapi, name='dapi', colormap='gray', opacity=1)
+    viewer.add_image(dapi, name="dapi", colormap="gray", opacity=1)
 
-    viewer.add_image(bra_napari, name='bra', colormap='red', opacity=1)
-    viewer.add_image(ecad_napari, name='ecad', colormap='green', opacity=1)
+    viewer.add_image(bra_napari, name="bra", colormap="red", opacity=1)
+    viewer.add_image(ecad_napari, name="ecad", colormap="green", opacity=1)
 
-    viewer.add_image(bra_smoothed, name='bra_smoothed', colormap='red', opacity=1)
-    viewer.add_image(ecad_smoothed, name='ecad_smoothed', colormap='green', opacity=1)
+    viewer.add_image(bra_smoothed, name="bra_smoothed", colormap="red", opacity=1)
+    viewer.add_image(ecad_smoothed, name="ecad_smoothed", colormap="green", opacity=1)
 
-    viewer.add_image(mask_nuclei, name='mask_nuclei', colormap='gray', opacity=0.5)
-    viewer.add_image(mask_membranes, name='mask_membranes', colormap='gray', opacity=0.5)
+    viewer.add_image(mask_nuclei, name="mask_nuclei", colormap="gray", opacity=0.5)
+    viewer.add_image(
+        mask_membranes, name="mask_membranes", colormap="gray", opacity=0.5
+    )
 
     viewer.grid.enabled = True
     # viewer.grid.shape = (2, 3)
-    viewer.grid.shape = (1,2)
+    viewer.grid.shape = (1, 2)
 
     napari.run()
 
 
-
 plotter = SpatialCorrelationPlotter(
-            quantity_X=bra_smoothed,
-            quantity_Y=ecad_smoothed,
-            mask=mask,
-            labels=labels,
-        )
-
-fig, ax = plotter.get_heatmap_figure(
-    bins=[40,40],
-    show_individual_cells=True,
-    label_X='Bra signal (A.U)',
-    label_Y='Ecad signal (A.U)',
-    show_linear_fit=False,
-    display_quadrants=False
+    quantity_X=bra_smoothed,
+    quantity_Y=ecad_smoothed,
+    mask=mask,
+    labels=labels,
 )
 
-
+fig, ax = plotter.get_heatmap_figure(
+    bins=[40, 40],
+    show_individual_cells=True,
+    label_X="Bra signal (A.U)",
+    label_Y="Ecad signal (A.U)",
+    show_linear_fit=False,
+    display_quadrants=False,
+)
 
 
 # def plot(X, Y, mask ,labels,
@@ -154,7 +142,6 @@ fig, ax = plotter.get_heatmap_figure(
 # ### FIRST FIGURE: No normalization, full img + 3 depths
 
 # plot(endogen, reporter, mask, labels, 'Endogen signal (A.U)', 'Reporter signal (A.U)')
-
 
 
 plt.show()

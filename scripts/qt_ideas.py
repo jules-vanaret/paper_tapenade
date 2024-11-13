@@ -1,19 +1,65 @@
-
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPixmap
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QHBoxLayout,
-                            QLabel, QPushButton, QScrollArea, QSizePolicy,
-                            QStackedWidget, QTabWidget, QVBoxLayout, QWidget)
-from qtpy.QtWidgets import QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QScrollArea, QSizePolicy, QStackedWidget, QTabWidget, QVBoxLayout, QWidget
-from qtpy.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsPathItem, QGraphicsScene, QGraphicsView
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QStackedWidget,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from qtpy.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMenu,
+    QMenuBar,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QStackedWidget,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from qtpy.QtWidgets import (
+    QGraphicsEllipseItem,
+    QGraphicsItem,
+    QGraphicsPathItem,
+    QGraphicsScene,
+    QGraphicsView,
+)
 from qtpy.QtCore import QPointF
-from qtpy.QtWidgets import QApplication, QGraphicsEllipseItem, QGraphicsItem, QGraphicsPathItem, QGraphicsScene, QGraphicsView
+from qtpy.QtWidgets import (
+    QApplication,
+    QGraphicsEllipseItem,
+    QGraphicsItem,
+    QGraphicsPathItem,
+    QGraphicsScene,
+    QGraphicsView,
+)
 from qtpy.QtGui import QPainterPath, QPainter, QPen
 
-rad=5
+rad = 5
+
+
 class Node(QGraphicsEllipseItem):
     def __init__(self, path, index):
-        super(Node, self).__init__(-rad, -rad, 2*rad, 2*rad)
+        super(Node, self).__init__(-rad, -rad, 2 * rad, 2 * rad)
 
         self.rad = rad
         self.path = path
@@ -37,7 +83,7 @@ class Path(QGraphicsPathItem):
             node = Node(self, i)
             node.setPos(QPointF(path.elementAt(i)))
             scene.addItem(node)
-        self.setPen(QPen(Qt.red, 1.75))        
+        self.setPen(QPen(Qt.red, 1.75))
 
     def updateElement(self, index, pos):
         path.setElementPositionAt(index, pos.x(), pos.y())
@@ -49,10 +95,10 @@ if __name__ == "__main__":
     app = QApplication([])
 
     path = QPainterPath()
-    path.moveTo(0,0)
-    path.cubicTo(-30, 70, 35, 115, 100, 100);
-    path.lineTo(200, 100);
-    path.cubicTo(200, 30, 150, -35, 60, -30);
+    path.moveTo(0, 0)
+    path.cubicTo(-30, 70, 35, 115, 100, 100)
+    path.lineTo(200, 100)
+    path.cubicTo(200, 30, 150, -35, 60, -30)
 
     scene = QGraphicsScene()
     scene.addItem(Path(path, scene))
@@ -90,7 +136,7 @@ if __name__ == "__main__":
 
 #     def mouseReleaseEvent(self, event):
 #         if self.__mousePressPos is not None:
-#             moved = event.globalPos() - self.__mousePressPos 
+#             moved = event.globalPos() - self.__mousePressPos
 #             if moved.manhattanLength() > 3:
 #                 event.ignore()
 #                 return
