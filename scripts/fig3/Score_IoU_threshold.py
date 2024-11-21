@@ -8,6 +8,7 @@ import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import io
+from pathlib import Path
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import regionprops
 import napari
@@ -82,7 +83,7 @@ def relabel_segmentation(segmentation):
     return temp
 
 
-def filter_tiny_volumes(segmentation, thresh=50):
+def filter_tiny_volumes(, thresh=50):
     """
     Filter out small volumes in a segmentation
 
@@ -142,13 +143,15 @@ def array_tp(annotation, prediction, listTP):
     return array_TP_annotation, array_TP_prediction
 
 
-path_to_data = ...
+folder = ...
 Score = []
 
 list_IOUs = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]
 list_z = [17, 30, 60, 89, 120, 150, 180, 210]
 Scores = np.zeros((len(list_IOUs), len(list_z)))
-image = tifffile.imread(rf"{path_to_data}/im.tif")
+image = tifffile.imread(
+    Path(folder) / "3c_segmentation_performances/2_registered.tif"
+)
 colors = [
     "#77AADD",
     "#99DDFF",
@@ -163,8 +166,12 @@ colors = [
 for ind_thresh, thresh_IoU in enumerate(list_IOUs):
     for indz, z in enumerate(list_z):
         dapi = image[z, 0, :, :]
-        annotation = tifffile.imread(rf"{path_to_data}\annotation.tif")[z, :, :]
-        prediction = tifffile.imread(rf"{path_to_data}\prediction.tif")[z, :, :]
+        annotation = tifffile.imread(
+            Path(folder) / "3c_segmentation_performances/2_annotation.tif"
+        )[z, :, :]
+        prediction = tifffile.imread(
+            Path(folder) / "3c_segmentation_performances/2_seg.tif"
+        )[z, :, :]
 
         annotation = relabel_segmentation(annotation)
         prediction = relabel_segmentation(prediction)
@@ -199,5 +206,4 @@ ax.tick_params(axis="x", labelsize=25)
 ax.set_xlabel("IoU threshold", fontsize=25)
 ax.set_ylabel("f1 score", fontsize=25)
 plt.legend()
-plt.show()
-# fig.savefig(rf'{path_to_data}\plot.svg')
+plt.savefig(Path(folder) / "2d_2_plot.svg")

@@ -1,6 +1,6 @@
-# Plots line profile of the intensity of Hoechst and Tbra in the midplane of the sample, and their normalized versions.
+# Plots line profile of the intensity of Hoechst and Tbra in the midplane of the num_sample, and their normalized versions.
 
-
+from pathlib import Path
 import tifffile
 import napari
 import matplotlib.pyplot as plt
@@ -8,15 +8,16 @@ import numpy as np
 from tapenade.preprocessing import (
     masked_gaussian_smoothing,
     normalize_intensity,
+    change_array_pixelsize,
 )
 
 
-def save_fig(data, folder, cmap, vmin, vmax):
+def save_fig(data, path, cmap, vmin, vmax):
     fig = plt.figure()
     fig = plt.imshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
     fig = plt.xticks([])
     fig = plt.yticks([])
-    fig = plt.savefig(rf"{folder}", dpi=500)
+    fig = plt.savefig(Path(path), dpi=500)
     return fig
 
 
@@ -39,14 +40,24 @@ light_red = "#EE8866"
 dark_red = "#663333"
 
 sigma_norm = 11.8  # size of normalization kernel, found with optimization in the function normalize_intensity
-z = 150  # middle slice of the sample
+z = 150  # middle slice of the gastruloid
 half_thickness = 30  # max proj on 60µm subvolume around the midplane
-sigma_plot = 40  # size of the smoothing kernel for the profile plot
-
-folder = ...
-im = tifffile.imread(rf"{folder}\1.tif")
-mask = (tifffile.imread(rf"{folder}\1_mask.tif")).astype(bool)
-seg = tifffile.imread(rf"{folder}\1_seg.tif")
+sigma_plot = 5  # size of the smoothing kernel for the profile plot
+scale = (1, 0.6, 0.6)
+folder = rf"Z:\EqpLenne2\SHARED\Whole_Mount_paper"
+num_sample = 1  # plot 5a
+# num_sample = 6 #plot 5b
+im = tifffile.imread(
+    Path(folder) / f"5a_Dapi_Ecad_bra_sox2_725h_re/data/{num_sample}.tif"
+)
+mask = (
+    tifffile.imread(
+        Path(folder) / f"5a_Dapi_Ecad_bra_sox2_725h_re/masks/{num_sample}_mask.tif"
+    )
+).astype(bool)
+seg = tifffile.imread(
+    Path(folder) / f"5a_Dapi_Ecad_bra_sox2_725h_re/segmentation/{num_sample}_seg.tif"
+)
 Hoechst = im[:, 0, :, :]
 Tbra = im[:, 2, :, :]
 
@@ -68,11 +79,41 @@ Hoechst_2D = np.mean(Hoechst[z - half_thickness : z + half_thickness], axis=0)
 Tbra_norm_2D[np.isnan(Tbra_norm_2D)] = 0
 Hoechst_norm_2D[np.isnan(Hoechst_norm_2D)] = 0
 
-save_fig(Tbra_2D, rf"{folder}\Tbra_2D.svg", "gray_r", 0, 150)
-save_fig(Hoechst_2D, rf"{folder}\Hoechst_2D.svg", "gray_r", 0, 150)
-save_fig(Tbra_norm_2D, rf"{folder}\Tbra_norm_2D.svg", "gray_r", 0, 500)
-save_fig(Hoechst_norm_2D, rf"{folder}\Hoechst_norm_2D.svg", "gray_r", 0, 500)
-save_fig(Hoechst_smooth[z], rf"{folder}\Hoechst_smooth.svg", "turbo", 0, 200)
+save_fig(
+    Tbra_2D,
+    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_2D.svg",
+    "gray_r",
+    0,
+    150,
+)
+save_fig(
+    Hoechst_2D,
+    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_2D.svg",
+    "gray_r",
+    0,
+    150,
+)
+save_fig(
+    Tbra_norm_2D,
+    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_norm_2D.svg",
+    "gray_r",
+    0,
+    500,
+)
+save_fig(
+    Hoechst_norm_2D,
+    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_norm_2D.svg",
+    "gray_r",
+    0,
+    500,
+)
+save_fig(
+    Hoechst_smooth[z],
+    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_smooth.svg",
+    "turbo",
+    0,
+    200,
+)
 
 fig, ax = plt.subplots(2, figsize=(7, 9))
 # signal is smoothed to extract large scale variations
@@ -140,5 +181,5 @@ lines_0, labels_0 = ax[1].get_legend_handles_labels()
 lines_0_1, labels_0_1 = ax1_twin.get_legend_handles_labels()
 ax[1].legend(lines_0 + lines_0_1, labels_0 + labels_0_1, fontsize=25)
 
-fig.savefig(rf"{folder}\profile.svg")
+fig.savefig(Path(folder) / "5a_plot.svg")
 plt.show()

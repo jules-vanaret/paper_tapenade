@@ -5,17 +5,17 @@ from tapenade.preprocessing._intensity_normalization import _normalize_intensity
 import tifffile
 import matplotlib.pyplot as plt
 import napari
+from pathlib import Path
 
+folder = ...
 
-path_to_data = ...
+mask = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/mask.tif")
 
-mask = tifffile.imread(f"{path_to_data}/mask.tif")
+labels = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/labels.tif")
+hoechst = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/hoechst_before_norm.tif")
 
-labels = tifffile.imread(f"{path_to_data}/labels.tif")
-hoechst = tifffile.imread(f"{path_to_data}/hoechst_before_norm.tif")
-
-endogen = tifffile.imread(f"{path_to_data}/endo_iso.tif")
-immunostained = tifffile.imread(f"{path_to_data}/immunostained_iso.tif")
+endogen = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/endo_iso.tif")
+immunostained = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/immunostained_iso.tif")
 
 hoechst_norm = _normalize_intensity(
     array=hoechst,
@@ -30,7 +30,7 @@ endogen_norm = _normalize_intensity(
     ref_array=endogen,
     mask=mask,
     labels=labels,
-    image_wavelength=555,
+    image_wavelength=488,
     sigma=14,
 )
 immunostained_norm = _normalize_intensity(
@@ -225,7 +225,7 @@ plot(
     "Endogenous signal (A.U)",
     "Immunostained signal (A.U)",
 )
-plt.savefig(rf"{path_to_data}\not_norm_correlation_heatmaps_endo_reporter.png")
+plt.savefig(Path(folder)/"S7_b_c.png")
 
 
 # ### SECOND FIGURE: Normalization, full img + 3 depths
@@ -238,5 +238,5 @@ plot(
     "Endogenous signal normalized (A.U)",
     "Immunostained signal \n normalized (A.U)",
 )
-plt.savefig(rf"{path_to_data}\norm_correlation_heatmaps_endo_reporter.png")
+plt.savefig(Path(folder)/"S7_d.png")
 plt.show()

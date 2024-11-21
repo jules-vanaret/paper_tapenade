@@ -1,12 +1,19 @@
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
+import napari
+from pathlib import Path
 
 folder = ...
-oneview = tifffile.imread(rf"{folder}\1_view.tif")
-twoviews = tifffile.imread(rf"{folder}\2_views.tif")
-mask_oneview = tifffile.imread(rf"{folder}\1_view_mask.tif")
-mask_twoviews = tifffile.imread(rf"{folder}\1_views_mask.tif")
+oneview_bottom = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_bottom_iso.tif")
+oneview_top = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_top_iso.tif")
+twoviews = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_reg_iso.tif")
+mask_oneview_bottom = tifffile.imread(
+    Path(folder) / "2f_1vs2views_imaging/6_bottom_iso_mask.tif"
+)
+mask_twoviews = tifffile.imread(
+    Path(folder) / "2f_1vs2views_imaging/6_reg_iso_mask.tif"
+)
 
 
 def list_intensities(im, mask):
@@ -18,8 +25,8 @@ def list_intensities(im, mask):
     return int_im
 
 
-int_oneview = list_intensities(oneview, mask_oneview)
-list_depths_1side = np.arange(0, len(oneview))
+int_oneview = list_intensities(oneview_bottom, mask_oneview_bottom)
+list_depths_1side = np.arange(0, len(oneview_bottom))
 int_twoviews = list_intensities(twoviews, mask_twoviews)
 list_depths_2sides = np.arange(0, len(twoviews))
 
@@ -39,4 +46,14 @@ plt.title("Averaged intensity for one\n vs two views imaging", fontsize=30)
 plt.legend(loc="lower left", prop={"size": 20})
 plt.xticks([0, 100, 200, 300], fontsize=20)
 plt.yticks([0, 100, 200], fontsize=20)
-plt.savefig(rf"{folder}\plot.svg")
+plt.show()
+plt.savefig(Path(folder) / "2f_plot.svg")
+
+
+viewer = napari.Viewer()
+viewer.add_image(oneview_bottom, colormap="gray_r")
+viewer.add_image(oneview_top, colormap="gray_r")
+viewer.add_image(twoviews, colormap="gray_r")
+for l in viewer.layers:
+    l.data = np.transpose(l.data, (1, 0, 2))
+napari.run()

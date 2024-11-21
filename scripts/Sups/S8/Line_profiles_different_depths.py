@@ -1,6 +1,7 @@
 # plot intensity profile in a XY plane for Hoechst and T-Bra, normalized. we look a different planes to check (for dapi) if there is no decrease in z.
 
 import tifffile
+from pathlib import Path
 import napari
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,16 +38,16 @@ folder = ...
 colors_bra = ["#FEE391", "#FE9A29", "#CC4C02", "#993404", "#662506"]
 colors_hoechst = ["#B5DDD8", "#81C4E7", "#9398D2", "#906388", "#684957"]
 
-scale = (1, 0.6, 0.6)
+scale = (1, 1,1)
 sigma_plot = 30
 sigma_norm = 11
 dz = 5  # half thickness of each subvolume around the slices
 visualize_napari = False
-im = tifffile.imread(rf"{folder}\data\1.tif")
-mask = (tifffile.imread(rf"{folder}\masks\1.tif")).astype(bool)
-seg = tifffile.imread(rf"{folder}\segmentation\1.tif")
+im = tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\data\6.tif")
+mask = (tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\masks\6_mask.tif")).astype(bool)
+seg = tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\segmentation\6_seg.tif")
 hoechst = im[:, 0, :, :]
-bra = im[:, 3, :, :]
+bra = im[:, 2, :, :]
 
 hoechst_iso = change_array_pixelsize(array=hoechst, input_pixelsize=scale)
 bra_iso = change_array_pixelsize(array=bra, input_pixelsize=scale)
@@ -156,8 +157,8 @@ def shape_axis(ax, ymax):
     ax.legend()
 
 
-ymax_hoechst = 1100
-ymax_tbra = 900
+ymax_hoechst = 300
+ymax_tbra = 300
 shape_axis(ax[0, 0], ymax=ymax_hoechst)
 shape_axis(ax[0, 1], ymax=ymax_hoechst)
 shape_axis(ax[1, 0], ymax=ymax_tbra)
@@ -166,5 +167,5 @@ shape_axis(ax[1, 1], ymax=ymax_tbra)
 ax[0, 0].legend()
 ax[1, 0].legend()
 
-fig.savefig(rf"{folder}\line_profile.svg")
+fig.savefig(rf"{folder}\S8b_plot.svg")
 plt.show()

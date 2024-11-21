@@ -368,9 +368,9 @@ def func(index_organoid):
 
             deformation_data = np.zeros_like(mask, dtype=np.float32)
             for i, prop in enumerate(props):
-                deformation_data[prop.slice][
-                    prop.image
-                ] = sparse_data_deformation_smoothed[i, 3]
+                deformation_data[prop.slice][prop.image] = (
+                    sparse_data_deformation_smoothed[i, 3]
+                )
 
             tifffile.imwrite(
                 f"{path_to_data}/{name_folder}/prolate_vs_oblate/ag{index_organoid}_sigma{sigma}.tif",

@@ -1,6 +1,7 @@
 # plots the intensity profile of Hoechst in depth for different sigmas of the gaussian filter used for normalization
 import tifffile
 import napari
+from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from tapenade.preprocessing._smoothing import _masked_smooth_gaussian
@@ -10,25 +11,25 @@ from tapenade.preprocessing._preprocessing import (
 )
 
 
-def save_fig(data, folder, cmap, vmin, vmax):
+def save_fig(data, path, cmap, vmin, vmax):
     fig = plt.figure()
     fig = plt.imshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
     fig = plt.xticks([])
     fig = plt.yticks([])
-    fig = plt.savefig(rf"{folder}", dpi=500)
+    fig = plt.savefig(Path(path), dpi=500)
     return fig
 
 
-folder = rf"C:\Users\gros\Desktop\DATA\2k_Hoechst_FoxA2_Oct4_Bra_78h\big"
+folder = ...
 
 fig, ax = plt.subplots(1, figsize=(10, 7))
 
 colors = ["#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377"]
 scale = (1, 0.6, 0.6)
 
-im = tifffile.imread(rf"{folder}\data\1.tif")
-mask = tifffile.imread(rf"{folder}\masks\1_mask.tif")
-seg = tifffile.imread(rf"{folder}\segmentation\1_seg.tif")
+im = tifffile.imread(Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/big/data/1.tif")
+mask = (tifffile.imread(Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/big/masks/1_mask.tif")).astype(bool)
+seg = tifffile.imread(Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/big/segmentation/1_seg.tif")
 hoechst = im[:, 0, :, :]
 hoechst_iso = change_array_pixelsize(array=hoechst, input_pixelsize=scale)
 mask_iso = change_array_pixelsize(array=mask, input_pixelsize=scale, order=0)
@@ -56,7 +57,7 @@ for sigma in [10, 20, 40]:
     hoechst_nan = np.where(mask_iso == 1, hoechst_smooth, np.nan).astype(float)
     save_fig(
         hoechst_nan[120],
-        rf"C:\Users\gros\Desktop\Organoid\sigmas\smoothed_hoechst_sigma_{sigma}.svg",
+        Path(folder) / f"S8e_smoothed_hoechst_sigma_{sigma}.svg",
         "viridis",
         0,
         120,
@@ -72,18 +73,17 @@ for sigma in [10, 20, 40]:
         linewidth=4,
     )
     i += 1
-
 ax.plot(
-    Int_hoechst_non_norm, label="Raw data, not normalized", color=colors[i], linewidth=4
+    Int_hoechst_non_norm, label="Raw data, unnormalized", color=colors[i], linewidth=4
 )
 ax.set_xlabel("Depth (µm)", fontsize=30)
 ax.set_ylabel("Intensity in \nHoechst (A.U)", fontsize=30)
-ax.set_yticks([0, 50, 100, 150, 200])
+ax.set_yticks([0, 50, 100, 150])
 ax.set_xticks([0, 100, 200, 300])
 ax.tick_params(axis="y", labelsize=30)
 ax.tick_params(axis="x", labelsize=30)
 ax.legend(fontsize=15)
 
-fig.savefig(rf"C:\Users\gros\Desktop\Organoid\sigmas\profile_sigmas.svg")
+fig.savefig(Path(folder) / "S8e_plot.svg")
 plt.legend()
 plt.show()

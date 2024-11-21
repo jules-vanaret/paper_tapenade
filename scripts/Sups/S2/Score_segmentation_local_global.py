@@ -11,11 +11,10 @@ import tol_colors as tc
 from skimage import io
 from scipy.optimize import linear_sum_assignment
 import napari
+from pathlib import Path
 from skimage.measure import regionprops
 
 io.use_plugin("pil")
-
-
 cset = tc.tol_cset("muted")
 
 
@@ -156,54 +155,43 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-plot = "plot_1_vs_2view"
-# plot = 'plot_local_vs_global'
-
-if plot == "plot_1_vs_2view":
-    path_to_data = ...
-    list_z = [10, 50, 90, 130, 170, 210, 250]
-    image = tifffile.imread(rf"{path_to_data}/im.tif")
-if plot == "plot_local_vs_global":
-    path_to_data = ...
-    list_z = [17, 30, 60, 89, 120, 150, 180, 210]
-    image = tifffile.imread(rf"{path_to_data}/im.tif")
-
-path_fig = ...
+folder = ...
+list_z = [17, 30, 60, 89, 120, 150, 180, 210]
+thresh_IoU = 0.5
 Z = []
-ious = []
 Precision_u = []
 Recall_u = []
 Precision_c = []
 Recall_c = []
 
-thresh_IoU = 0.5
-# viewer=napari.Viewer()
+image_unnormalized = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/hoechst_unnormalized.tif")
+image_locally_normalized = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/hoechst_locale.tif")
+image_globally_normalized = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/hoechst_globale.tif")
+annotation_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_annotation.tif")
+segmentation_corrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_seg_locale.tif")
+segmentation_uncorrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_seg_globale.tif")
+
+
+viewer=napari.Viewer()
+viewer.add_image(image_unnormalized,scale=(0.7,0.7,0.7))
+viewer.add_image(image_globally_normalized,scale=(0.7,0.7,0.7))
+viewer.add_image(image_locally_normalized,scale=(0.7,0.7,0.7))
+viewer.add_labels(annotation_3D,scale=(1,0.6,0.6))
+viewer.add_labels(segmentation_uncorrected_3D,scale=(1,0.6,0.6))
+viewer.add_labels(segmentation_corrected_3D,scale=(1,0.6,0.6))
+viewer.grid.enabled = True
+viewer.grid.stride = -1
+viewer.grid.shape = (2, 3)  # 2 rows, 3 columns
 
 for z in list_z:
-    if plot == "plot_1_vs_2view":
-        dapi = image[
-            z, image.shape[1] // 2 :, :
-        ]  # annotated only in the bottom part of the image
-        annotation = tifffile.imread(rf"{path_to_data}/annotation.tif")[
-            z, image.shape[1] // 2 :, :
-        ]
-        segmentation_corrected = (
-            tifffile.imread(rf"{path_to_data}/labels_local.tif")[
-                z, image.shape[1] // 2 :, :
-            ]
-        ).astype(int)
-    if plot == "plot_local_vs_global":
-        dapi = image[z, :, :]
-        annotation = tifffile.imread(rf"{path_to_data}\annotation.tif")[z, :, :]
-        segmentation_corrected = tifffile.imread(rf"{path_to_data}/labels_local.tif")[
-            z, :, :
-        ]
-
+    annotation=annotation_3D[z,:,:]
+    segmentation_corrected=segmentation_corrected_3D[z,:,:]
+    segmentation_uncorrected=segmentation_uncorrected_3D[z,:,:]
+    annotation = filter_tiny_volumes(annotation)
+    annotation = relabel_segmentation(annotation)
     segmentation_corrected = filter_tiny_volumes(
         segmentation_corrected
     )  # the 3D segmentation after cuting 1 slice shows small volumes that we dont want to assign, we filter them out
-    annotation = filter_tiny_volumes(annotation)
-    annotation = relabel_segmentation(annotation)
     segmentation_corrected = relabel_segmentation(segmentation_corrected)
 
     iou_matrix = build_iou_matrix(annotation, segmentation_corrected)
@@ -212,7 +200,7 @@ for z in list_z:
     nb_cells_annotated = len(np.unique(annotation)) - 1
     nb_cells_predicted = len(np.unique(segmentation_corrected)) - 1
 
-    if len(listTP[0]) == 0:
+    if len(listTP) == 0:
         recall, precision, avg_iou = 0, 0, 0
     else:
         nb_tp = len(listTP[0])
@@ -224,23 +212,7 @@ for z in list_z:
     Precision_c.append(precision)
     Recall_c.append(recall)
 
-    if plot == "plot_1_vs_2view":
-        annotation = tifffile.imread(rf"{path_to_data}\annotation.tif")[
-            z, image.shape[1] // 2 :, :
-        ]
-        segmentation_uncorrected = (
-            tifffile.imread(rf"{path_to_data}/labels_1view.tif")[
-                z, image.shape[1] // 2 :, :
-            ]
-        ).astype(int)
-    if plot == "plot_local_vs_global":
-        annotation = tifffile.imread(rf"{path_to_data}\annotation.tif")[z, :, :]
-        segmentation_uncorrected = tifffile.imread(
-            rf"{path_to_data}/labels_global.tif"
-        )[z, :, :]
-    annotation = filter_tiny_volumes(annotation)
     segmentation_uncorrected = filter_tiny_volumes(segmentation_uncorrected)
-    annotation = relabel_segmentation(annotation)
     segmentation_uncorrected = relabel_segmentation(segmentation_uncorrected)
     iou_matrix = build_iou_matrix(annotation, segmentation_uncorrected)
     listTP = list_tp_from_iou_matrix(iou_matrix, thresh_IoU)
@@ -285,5 +257,5 @@ ax.tick_params(axis="x", labelsize=25)
 ax.set_ylabel("f1 score", fontsize=25)
 lines_1, labels_1 = ax.get_legend_handles_labels()
 plt.legend()
-# fig.savefig(rf'{path_fig}\plot.svg')
+plt.savefig(Path(folder)/"S2d_plot.svg")
 plt.show()
