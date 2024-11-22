@@ -120,6 +120,8 @@ std_ratios = [0,0,0,0]
 normalization_bool = True
 column_bool=True #if not, we look at the decay in the full sample, not in a central column
 plot_individual_fits_bool=False
+
+#aligning manaually the decaying curves the their maximum
 plans_to_cut_farred = [57,35,44,25]
 plans_to_cut_red = [25,35,25,25,25]
 plans_to_cut_red_tdt = [15,25,20,25,15,15]

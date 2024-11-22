@@ -155,7 +155,7 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-folder = rf'Z:\EqpLenne2\SHARED\Whole_Mount_paper'
+folder = ...
 list_z = [10, 50, 90, 130, 170, 210, 250]
 image = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/image.tif")
 

@@ -12,7 +12,7 @@ import pandas as pd
 import seaborn as sns
 from tapenade.preprocessing import isotropize_and_normalize
 
-folder = rf"Z:\EqpLenne2\SHARED\Whole_Mount_paper"
+folder = ...
 # plot 5d
 path_dataset1 = Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/big"
 path_dataset2 = Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/small"
