@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from stardist.models import StarDist3D
 from tqdm import tqdm
-from tapenade.preprocessing import local_image_equalization
+from tapenade.preprocessing import local_contrast_enhancement
 from tapenade.preprocessing import change_arrays_pixelsize
 
 

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, median_filter
 import tifffile
 import napari
-from tapenade.preprocessing import change_arrays_pixelsize, local_image_equalization
+from tapenade.preprocessing import change_array_pixelsize, local_contrast_enhancement
 from time import time
 from skimage.filters import threshold_otsu
 
@@ -11,9 +11,9 @@ data = tifffile.imread("/home/jvanaret/data/data_paper_tapenade/morphology/ag6.l
     :, 0
 ]
 
-data = change_arrays_pixelsize(image=data, reshape_factors=(1, 1 / 2, 1 / 2))
+data = change_array_pixelsize(image=data, reshape_factors=(1, 1 / 2, 1 / 2))
 data = (data / np.max(data)).astype(np.float32)
-datae = local_image_equalization(data, box_size=2, perc_low=1, perc_high=99)
+datae = local_contrast_enhancement(data, box_size=2, perc_low=1, perc_high=99)
 
 
 t0 = time()

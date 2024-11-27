@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from stardist.models import StarDist3D
 from tqdm import tqdm
-from tapenade.preprocessing import local_image_equalization
+from tapenade.preprocessing import local_contrast_enhancement
 from tapenade.preprocessing import change_arrays_pixelsize
 
 
@@ -14,7 +14,7 @@ path_to_data = "/data1/data_paper_tapenade/1_vs_2_views"
 
 one_view = tifffile.imread(f"{path_to_data}/iso.tif")
 one_view_mask = tifffile.imread(f"{path_to_data}/iso_mask.tif")
-one_view_norm = local_image_equalization(
+one_view_norm = local_contrast_enhancement(
     one_view, box_size=10, perc_low=1, perc_high=99, mask=one_view_mask
 )
 
@@ -24,7 +24,7 @@ one_view_norm = local_image_equalization(
 
 two_views = tifffile.imread(f"{path_to_data}/g2_dapi_fused.tif")
 two_views_mask = tifffile.imread(f"{path_to_data}/g2_dapi_fused_mask.tif")
-two_views_norm = local_image_equalization(
+two_views_norm = local_contrast_enhancement(
     two_views, box_size=10, perc_low=1, perc_high=99, mask=two_views_mask
 )
 
