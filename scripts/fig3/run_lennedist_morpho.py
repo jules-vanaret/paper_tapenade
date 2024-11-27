@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from stardist.models import StarDist3D
 from tqdm import tqdm
 from tapenade.preprocessing import local_contrast_enhancement
-from tapenade.preprocessing import change_arrays_pixelsize
+from tapenade.preprocessing import change_array_pixelsize
 
 
 def predict_lennedist(array, zoom_factors, normalize=False):
@@ -29,7 +29,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
 
     # isotropize to reach target object size
     if not all(zf == 1 for zf in zoom_factors):
-        array = change_arrays_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
+        array = change_array_pixelsize(image=array, zoom_factors=zoom_factors, order=1)
     print(array.min(), array.max())
 
     model = StarDist3D(
@@ -49,7 +49,7 @@ def predict_lennedist(array, zoom_factors, normalize=False):
 
     if not all(zf == 1 for zf in zoom_factors):
         second_zoom_factors = [1 / zf for zf in zoom_factors]
-        labels = change_arrays_pixelsize(
+        labels = change_array_pixelsize(
             labels, zoom_factors=second_zoom_factors, order=0
         )
 
