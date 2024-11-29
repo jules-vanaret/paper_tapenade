@@ -38,11 +38,11 @@ scale = (1, 1, 1)
 visualize_napari = True
 save_2D_maps = True
 z = 85  # if save_2D_maps is True, the z plane to look at
-#S6b : Path(folder) / f"4b_S6b_proliferation/10b/1_data.tif"
-mask = tifffile.imread(Path(folder) / f"4b_S6b_proliferation/4_mask.tif")
-image = tifffile.imread(Path(folder) / f"4b_S6b_proliferation/4_data.tif")
-seg = tifffile.imread(Path(folder) / f"4b_S6b_proliferation/4_seg.tif").astype(int)
-div = tifffile.imread(Path(folder) / f"4b_S6b_proliferation/4_div.tif").astype(int)
+#S6b : Path(folder) / f"S6b_proliferation/10b/1_data.tif"
+mask = tifffile.imread(Path(folder) / f"4b_proliferation/4_mask.tif")
+image = tifffile.imread(Path(folder) / f"4b_proliferation/4_data.tif")
+seg = tifffile.imread(Path(folder) / f"4b_proliferation/4_seg.tif").astype(int)
+div = tifffile.imread(Path(folder) / f"4b_proliferation/4_div.tif").astype(int)
 hoechst = image[:, 0, :, :]
 hoechst[mask == 0] = 0
 ph3 = image[:, 1, :, :]

@@ -32,8 +32,8 @@ folder = ...
 list_name = ['#1_Hoechst_FoxA2_Oct4_Bra_78h_big_5','#2_Hoechst_FoxA2_Oct4_Bra_78h_small_4','#3_Dapi_Ecad_bra_sox2_725h_re_6_reg_0.6','#4_48_12h_Hoechst_Ecad_Bra_Sox2_2']
 for name in list_name :
     fig, ax = plt.subplots(1, figsize=(10, 7))
-    hoechst = tifffile.imread(Path(folder) / f"12e_robustness_normalization/{name}_hoechst.tif")
-    mask = (tifffile.imread(Path(folder) / f"12e_robustness_normalization/{name}_mask.tif")).astype(bool)
+    hoechst = tifffile.imread(Path(folder) / f"S8d_robustness_normalization/{name}_hoechst.tif")
+    mask = (tifffile.imread(Path(folder) / f"S8d_robustness_normalization/{name}_mask.tif")).astype(bool)
 
     sigma = 20
     scale = (1, 0.6, 0.6)
