@@ -83,13 +83,13 @@ division_density_map[mask == 0] = np.nan
 cell_density_map[mask == 0] = np.nan
 
 tifffile.imwrite(
-    Path(folder) / f"4b_10b_proliferation/4_proliferation.tif", proliferation
+    Path(folder) / f"4b_proliferation/4_proliferation.tif", proliferation
 )
 tifffile.imwrite(
-    Path(folder) / f"4b_10b_proliferation/4_celldens.tif", cell_density_map
+    Path(folder) / f"4b_proliferation/4_celldens.tif", cell_density_map
 )
 tifffile.imwrite(
-    Path(folder) / f"4b_10b_proliferation/4_divdens.tif", division_density_map
+    Path(folder) / f"4b_proliferation/4_divdens.tif", division_density_map
 )
 
 if visualize_napari:
@@ -121,7 +121,7 @@ if save_2D_maps:
     im = cell_density_map[z, :, :]
     save_fig(
         im,
-        Path(folder) / f"4b_10b_proliferation/4_z{z}_celldens.svg",
+        Path(folder) / f"4b_proliferation/4_z{z}_celldens.svg",
         "inferno",
         np.nanpercentile(im, 1),
         np.nanpercentile(im, 99),
@@ -137,7 +137,7 @@ if save_2D_maps:
     im = division_density_map[z, :, :]
     save_fig(
         im,
-        Path(folder) / f"4b_10b_proliferation/4_z{z}_divdens.svg",
+        Path(folder) / f"4b_proliferation/4_z{z}_divdens.svg",
         "inferno",
         np.nanpercentile(im, 1),
         np.nanpercentile(im, 99),
@@ -152,7 +152,7 @@ if save_2D_maps:
     im = proliferation[z, :, :]
     save_fig(
         im,
-        Path(folder) / f"4b_10b_proliferation/4_z{z}_prol.svg",
+        Path(folder) / f"4b_proliferation/4_z{z}_prol.svg",
         "inferno",
         np.nanpercentile(im, 1),
         np.nanpercentile(im, 99),
@@ -167,7 +167,7 @@ if save_2D_maps:
     im = hoechst_norm[z, :, :]
     save_fig(
         im,
-        Path(folder) / f"4b_10b_proliferation/4_z{z}_hoechst.svg",
+        Path(folder) / f"4b_proliferation/4_z{z}_hoechst.svg",
         "gray_r",
         np.nanpercentile(im, 1),
         np.nanpercentile(im, 99),
@@ -175,7 +175,7 @@ if save_2D_maps:
     im = ph3_norm[z, :, :]
     save_fig(
         im,
-        Path(folder) / f"4b_10b_proliferation/4_z{z}_ph3.svg",
+        Path(folder) / f"4b_proliferation/4_z{z}_ph3.svg",
         "gray_r",
         np.nanpercentile(im, 1),
         np.nanpercentile(im, 99),

@@ -45,8 +45,8 @@ half_thickness = 30  # max proj on 60µm subvolume around the midplane
 sigma_plot = 5  # size of the smoothing kernel for the profile plot
 scale = (1, 0.6, 0.6)
 folder = ...
-num_sample = 1  # plot 5a
-# num_sample = 6 #plot 5b
+# num_sample = 1  # plot 5b
+num_sample = 6 #plot 5a
 im = tifffile.imread(
     Path(folder) / f"5a_Dapi_Ecad_bra_sox2_725h_re/data/{num_sample}.tif"
 )

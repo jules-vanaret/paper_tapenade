@@ -16,7 +16,7 @@ folder_seg = Path(folder) / "3e_celldensity_depth/seg"
 paths = sorted(glob(rf"{folder_data}\*.tif"))
 
 scale = (0.65, 0.65, 0.65)
-samples = [5, 1, 14, 12]
+samples = [1]
 
 values = np.linspace(0, 1, len(samples) + 1)
 cmap = ["teal", "navy", "mediumvioletred", "firebrick"]
@@ -73,5 +73,5 @@ plt.xlabel("normalized depth", fontsize=30)
 plt.ylabel("Cells/(100µm)2", fontsize=30)
 plt.xticks([0.25, 0.5, 0.75, 1], fontsize=30)
 plt.yticks([0, 40, 80, 120], fontsize=30)
-plt.show()
 plt.savefig(Path(folder) / "3e_plot.svg")
+plt.show()

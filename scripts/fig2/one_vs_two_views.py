@@ -46,8 +46,8 @@ plt.title("Averaged intensity for one\n vs two views imaging", fontsize=30)
 plt.legend(loc="lower left", prop={"size": 20})
 plt.xticks([0, 100, 200, 300], fontsize=20)
 plt.yticks([0, 100, 200], fontsize=20)
-plt.show()
 plt.savefig(Path(folder) / "2f_plot.svg")
+plt.show()
 
 
 viewer = napari.Viewer()

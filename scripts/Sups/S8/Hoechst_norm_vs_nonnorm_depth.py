@@ -75,3 +75,4 @@ for name in list_name :
     ax.legend(fontsize=25)
     plt.legend()
     fig.savefig(Path(folder)/f"S8d_{name}_plot.svg")
+    plt.show()

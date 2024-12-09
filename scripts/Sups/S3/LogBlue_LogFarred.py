@@ -9,7 +9,6 @@ from tapenade.preprocessing._preprocessing import change_array_pixelsize
 import scipy.ndimage as ndi
 
 folder = ...
-
 fig,ax = plt.subplots(1,figsize=(10,7))
 all_blue = []
 all_farred = []
@@ -27,7 +26,7 @@ def flatten_image(image,mask,scale,blocksize,threshold):
     image_flat = image_blockreduced.flatten()
     return(image_flat)
 
-for num in tqdm(range(4)):
+for num in tqdm(range(1)):
     image = tifffile.imread(Path(folder) /f'S3_wavelength/{subfolder}/{num+1}.tif')
     farred = image[:,3,:,:].astype(float)
     blue = image[:,0,:,:].astype(float)

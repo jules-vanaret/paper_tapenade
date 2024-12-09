@@ -129,7 +129,6 @@ def save_matrix_in_txt(matrix, filename):
             for j in range(matrix.shape[1]):
                 file.write(str(i) + " " + str(j) + " " + str(matrix[i, j]) + "\n")
 
-
 def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     """
     From the iou matrix, maximizes the iou to assign pairs. Returns the list of True Positives cells only if they have an iou>chosen threshold
@@ -217,3 +216,4 @@ ax.set_ylabel("f1 score", fontsize=25)
 lines_1, labels_1 = ax.get_legend_handles_labels()
 plt.legend()
 plt.savefig(Path(folder) / "3d_1_plot.svg")
+plt.show()

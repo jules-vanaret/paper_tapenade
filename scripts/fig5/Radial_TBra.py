@@ -155,16 +155,17 @@ df_2 = compute_df_fromfolder(
     sigma=25,
     number_layers=number_layers,
 )
+
 #adding to the 'big sample' category some other gastruloids
-df_2 = compute_df_fromfolder(
-    folder_data=Path(path_dataset3) / "data",
-    folder_mask=Path(path_dataset3) / "masks",
-    folder_seg=Path(path_dataset3) / "segmentation",
-    df=df_2,
-    scale=scale,
-    sigma=25,
-    number_layers=number_layers,
-)
+# df_1 = compute_df_fromfolder(
+#     folder_data=Path(path_dataset3) / "data",
+#     folder_mask=Path(path_dataset3) / "masks",
+#     folder_seg=Path(path_dataset3) / "segmentation",
+#     df=df_1,
+#     scale=scale,
+#     sigma=25,
+#     number_layers=number_layers,
+# )
 
 fig = plt.figure(figsize=(14, 10))
 sns.lineplot(data=df_1, x="Layer", y="Mean", ci="sd", linewidth=3, color="plum")

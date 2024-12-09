@@ -83,7 +83,7 @@ def relabel_segmentation(segmentation):
     return temp
 
 
-def filter_tiny_volumes(, thresh=50):
+def filter_tiny_volumes(segmentation, thresh=50):
     """
     Filter out small volumes in a segmentation
 
@@ -207,3 +207,4 @@ ax.set_xlabel("IoU threshold", fontsize=25)
 ax.set_ylabel("f1 score", fontsize=25)
 plt.legend()
 plt.savefig(Path(folder) / "3d_2_plot.svg")
+plt.show()

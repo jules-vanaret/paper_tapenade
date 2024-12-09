@@ -93,12 +93,16 @@ def compute_d_from_df(list_d,df_image,ind):
 
 def process_samples(df, subfolder, channel, plans_to_cut,column_bool,normalization_bool):
     """Process all samples for a given dataset."""
-    samples = tifffile.imread(str(Path(folder) / f"S3_wavelength/{subfolder}/*.tif"))
-    for num, image in tqdm(enumerate(samples), desc=f"Processing {subfolder}"):
+    # if processing every sample in the folder
+    # samples = tifffile.imread(str(Path(folder) / f"S3_wavelength/{subfolder}/*.tif"))
+    # for num, image in tqdm(enumerate(samples), desc=f"Processing {subfolder}"):
+    for num in tqdm(range(1), desc=f"Processing {subfolder}"):
+        image = tifffile.imread(Path(folder) / f"S3_wavelength/{subfolder}/{num+1}.tif")
         if column_bool==True:
             mask = tifffile.imread(Path(folder)/f'S3_wavelength/{subfolder}/crops/{num+1}.tif') #here we read the column mask previously done but this is where the function column_mask should be called
         else :
             mask = tifffile.imread(Path(folder) / f"S3_wavelength/{subfolder}/masks/{num+1}.tif")
+        print(image.shape)
         image_channel = image[:, channel, :, :]
         df = concatenate_df(
             df,

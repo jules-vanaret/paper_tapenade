@@ -159,7 +159,6 @@ folder = ...
 list_z = [10, 50, 90, 130, 170, 210, 250]
 image = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/image.tif")
 
-path_fig = ...
 Z = []
 ious = []
 Precision_u = [] #uncorrected (1 view)
@@ -169,9 +168,9 @@ Recall_c = []
 
 thresh_IoU = 0.5
 # viewer=napari.Viewer()
-annotation_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_annotation.tif")
-segmentation_corrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_seg_locale.tif")
-segmentation_uncorrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2d_local_global/2_seg_globale.tif")
+annotation_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/annotation_1_2views.tif")
+segmentation_corrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/labels_2views.tif")
+segmentation_uncorrected_3D = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/labels_1view.tif")
 for z in list_z:
     dapi = image[
         z, image.shape[1] // 2 :, :
@@ -198,7 +197,7 @@ for z in list_z:
     nb_cells_annotated = len(np.unique(annotation)) - 1
     nb_cells_predicted = len(np.unique(segmentation_corrected)) - 1
 
-    if len(listTP[0]) == 0:
+    if len(listTP) == 0:
         recall, precision, avg_iou = 0, 0, 0
     else:
         nb_tp = len(listTP[0])
@@ -210,7 +209,7 @@ for z in list_z:
     Precision_c.append(precision)
     Recall_c.append(recall)
 
-    annotation = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/annotation_eroded_no_small_volumes.tif")[
+    annotation = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/annotation_1_2views.tif")[
         z, image.shape[1] // 2 :, :
     ]
     segmentation_uncorrected = (
@@ -264,5 +263,5 @@ ax.tick_params(axis="x", labelsize=25)
 ax.set_ylabel("f1 score", fontsize=25)
 lines_1, labels_1 = ax.get_legend_handles_labels()
 plt.legend()
-plt.savefig(Path(folder) / "S2_d_plot.svg")
+plt.savefig(Path(folder) / "S2d_plot2.svg")
 plt.show()

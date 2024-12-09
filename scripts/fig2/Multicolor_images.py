@@ -5,8 +5,9 @@ import tifffile
 folder = ...
 viewer = napari.Viewer()
 z_midplane = [155, 150, 135, 135, 110, 120, 130, 120]  # midplane of each sample
-
-for index, num_sample in enumerate([1, 4, 5, 6, 8, 9, 10, 11]):
+# samples = [1, 4, 5, 6, 8, 9, 10, 11]
+samples = [1]
+for index, num_sample in enumerate(samples):
     image = tifffile.imread(
         Path(folder) / f"2k_Hoechst_FoxA2_Oct4_Bra_78h/small/data/{num_sample}.tif"
     )
