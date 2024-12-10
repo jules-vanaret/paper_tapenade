@@ -153,7 +153,7 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-folder = path_to_data = Path(__file__).parents[3] / 'data'
+folder = Path(__file__).parents[3] / 'data'
 list_z = [17, 30, 60, 89, 120, 150, 180, 210]
 thresh_IoU = 0.5
 Z = []
