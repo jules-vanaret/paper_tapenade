@@ -5,7 +5,6 @@ from scipy.optimize import linear_sum_assignment
 from skimage.measure import regionprops
 from skimage.segmentation import clear_border
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from pathlib import Path
 
 def build_iou_matrix(gt_segmentation, pred_segmentation):
@@ -175,7 +174,7 @@ def compute_metrics_over_planes(annotation,prediction,visualize_napari,thresh_vo
         total_fn += nb_fn
     return total_tp,total_fp,total_fn
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 
 visualize_napari = False
 remove_border_cells = True

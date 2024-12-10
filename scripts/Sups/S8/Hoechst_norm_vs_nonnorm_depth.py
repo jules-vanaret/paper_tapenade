@@ -2,7 +2,6 @@
 
 import tifffile
 from pathlib import Path
-import napari
 import matplotlib.pyplot as plt
 import numpy as np
 from tapenade.preprocessing._preprocessing import (

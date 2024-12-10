@@ -2,7 +2,7 @@ import napari
 from pathlib import Path
 import tifffile
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 viewer = napari.Viewer()
 z_midplane = [155, 150, 135, 135, 110, 120, 130, 120]  # midplane of each sample
 # samples = [1, 4, 5, 6, 8, 9, 10, 11]

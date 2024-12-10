@@ -30,7 +30,7 @@ def save_fig(data, folder, cmap, vmin, vmax):
     return fig
 
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 sigma = 35
 scale = (1, 1, 1)
 

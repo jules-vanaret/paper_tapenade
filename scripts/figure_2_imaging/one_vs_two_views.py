@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import napari
 from pathlib import Path
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 oneview_bottom = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_bottom_iso.tif")
 oneview_top = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_top_iso.tif")
 twoviews = tifffile.imread(Path(folder) / "2f_1vs2views_imaging/6_reg_iso.tif")

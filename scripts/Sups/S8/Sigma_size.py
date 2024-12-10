@@ -1,6 +1,5 @@
 # plots the intensity profile of Hoechst in depth for different sigmas of the gaussian filter used for normalization
 import tifffile
-import napari
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,7 +19,7 @@ def save_fig(data, path, cmap, vmin, vmax):
     return fig
 
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 
 fig, ax = plt.subplots(1, figsize=(10, 7))
 

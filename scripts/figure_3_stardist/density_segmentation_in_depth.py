@@ -9,7 +9,7 @@ from tapenade.preprocessing._preprocessing import change_array_pixelsize
 from pathlib import Path
 import napari
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 folder_data = Path(folder) / "3e_celldensity_depth/hoechst"
 folder_mask = Path(folder) / "3e_celldensity_depth/masks"
 folder_seg = Path(folder) / "3e_celldensity_depth/seg"

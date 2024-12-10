@@ -116,7 +116,7 @@ def process_samples(df, subfolder, channel, plans_to_cut,column_bool,normalizati
 
 fig,ax = plt.subplots(1,figsize=(10,7))
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 colors = ['#1965B0','#4EB265','#E8601C','#882E72']
 
 wavelengths=[405,488,555,647]

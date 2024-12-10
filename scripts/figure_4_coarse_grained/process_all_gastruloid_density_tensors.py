@@ -10,9 +10,11 @@ from tapenade.analysis.deformation.additional_regionprops_properties import (
 from tapenade.preprocessing import masked_gaussian_smoothing_sparse, masked_gaussian_smoothing
 from skimage.morphology import binary_erosion
 import os
+from functools import partial
+from pathlib import Path
 
 
-def func(index_organoid, path_to_data, name_folder_midplane):
+def func(index_organoid, path_to_data, path_to_save_folder):
 
     def napari_vectors_from_tensors(smoothed_tensors, apply_decoupling, nematic=False, return_angles=False):
 
@@ -65,11 +67,11 @@ def func(index_organoid, path_to_data, name_folder_midplane):
     
 
     mask = tifffile.imread(
-        f'{path_to_data}/ag{index_organoid}_mask.tif'
+        path_to_data / f'ag{index_organoid}_mask.tif'
     )
 
     labels = tifffile.imread(
-        f'{path_to_data}/ag{index_organoid}_norm_labels.tif'
+        path_to_data / f'ag{index_organoid}_norm_labels.tif'
     )
 
 
@@ -139,13 +141,13 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         vectors[i,0] = prop.centroid
 
     tifffile.imwrite(
-        f'{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}.tif',
+        path_to_save_folder / f'true_strain_maxeig/ag{index_organoid}.tif',
         true_strain_maxeig[mid_plane_ind]
     )
 
 
     tifffile.imwrite(
-        f'{path_to_data}/{name_folder_midplane}/nuclear_volume/ag{index_organoid}.tif',
+        path_to_save_folder / f'nuclear_volume/ag{index_organoid}.tif',
         nuclear_volume[mid_plane_ind]
     )
 
@@ -159,7 +161,7 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         tifffile.imwrite(
-            f'{path_to_data}/{name_folder_midplane}/cell_density/ag{index_organoid}_sigma{sigma}.tif',
+            path_to_save_folder / f'cell_density/ag{index_organoid}_sigma{sigma}.tif',
             density[mid_plane_ind]
         )
 
@@ -175,7 +177,7 @@ def func(index_organoid, path_to_data, name_folder_midplane):
             gradient_magnitude_field = np.linalg.norm(gradient_field, axis=-1)
 
             tifffile.imwrite(
-                f'{path_to_data}/{name_folder_midplane}/cell_density_gradient_mag/ag{index_organoid}.tif',
+                path_to_save_folder / f'cell_density_gradient_mag/ag{index_organoid}.tif',
                 gradient_magnitude_field[mid_plane_ind]
             )
 
@@ -199,12 +201,12 @@ def func(index_organoid, path_to_data, name_folder_midplane):
             napari_gradient_on_grid_midplane = napari_gradient_on_grid[zs_mask]
 
             np.save(
-                f'{path_to_data}/{name_folder_midplane}/cell_density_gradient/ag{index_organoid}.npy',
+                path_to_save_folder / f'cell_density_gradient/ag{index_organoid}.npy',
                 napari_gradient_on_grid_midplane[:,:,1:]
             )
 
             np.save(
-                f'{path_to_data}/{name_folder_midplane}/cell_density_gradient/ag{index_organoid}_angles.npy',
+                path_to_save_folder / f'cell_density_gradient/ag{index_organoid}_angles.npy',
                 angles[zs_mask]
             )
 
@@ -217,7 +219,7 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         tifffile.imwrite(
-            f'{path_to_data}/{name_folder_midplane}/volume_fraction/ag{index_organoid}_sigma{sigma}.tif',
+            path_to_save_folder / f'volume_fraction/ag{index_organoid}_sigma{sigma}.tif',
             volume_fraction[mid_plane_ind]
         )
     
@@ -232,7 +234,7 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         tifffile.imwrite(
-            f'{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}_sigma{sigma}.tif',
+            path_to_save_folder / f'true_strain_maxeig/ag{index_organoid}_sigma{sigma}.tif',
             data_true_strain_maxeig_dense[mid_plane_ind]
         )
 
@@ -242,7 +244,7 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         tifffile.imwrite(
-            f'{path_to_data}/{name_folder_midplane}/nuclear_volume/ag{index_organoid}_sigma{sigma}.tif',
+            path_to_save_folder / f'nuclear_volume/ag{index_organoid}_sigma{sigma}.tif',
             nuclear_volume_smoothed[mid_plane_ind]
         )
 
@@ -279,12 +281,12 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         np.save(
-            f'{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}.npy',
+            path_to_save_folder / f'true_strain_tensor/ag{index_organoid}_sigma{sigma}.npy',
             napari_vectors_true_strain_midplane[:,:,1:]
         )
 
         np.save(
-            f'{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_angles.npy',
+            path_to_save_folder / f'true_strain_tensor/ag{index_organoid}_sigma{sigma}_angles.npy',
             angles_vectors_true_strain_midplane
         )
 
@@ -311,12 +313,12 @@ def func(index_organoid, path_to_data, name_folder_midplane):
         )
 
         np.save(
-            f'{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled.npy',
+            path_to_save_folder / f'true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled.npy',
             napari_vectors_true_strain_2d_midplane[:,:,1:]
         )
 
         np.save(
-            f'{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled_angles.npy',
+            path_to_save_folder / f'true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled_angles.npy',
             angles_vectors_true_strain_2d_midplane
         )
         ###
@@ -366,47 +368,50 @@ def func(index_organoid, path_to_data, name_folder_midplane):
     )
 
     tifffile.imwrite(
-        f'{path_to_data}/{name_folder_midplane}/dot_product_map/ag{index_organoid}.tif',
+        path_to_save_folder / f'dot_product_map/ag{index_organoid}.tif',
         dot_product_map_dense[mid_plane_ind]
     )
 
 
 if __name__ == '__main__':
 
-    path_to_data = '/home/jvanaret/data/data_paper_tapenade/morphology/processed'
-    name_folder_midplane = 'all_quantities_midplane'
+    path_to_data = Path(__file__).parents[2] / 'data'
+    path_to_data = path_to_data / 'data_morphology'
+    path_to_save_folder = path_to_data / 'all_quantities_midplane'
 
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane), exist_ok=True
+        path_to_save_folder, exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'cell_density'), exist_ok=True
+        path_to_save_folder / 'cell_density', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'cell_density_gradient'), exist_ok=True
+        path_to_save_folder / 'cell_density_gradient', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'cell_density_gradient_mag'), exist_ok=True
+        path_to_save_folder / 'cell_density_gradient_mag', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'true_strain_maxeig'), exist_ok=True
+        path_to_save_folder / 'true_strain_maxeig', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'nuclear_volume'), exist_ok=True
+        path_to_save_folder / 'nuclear_volume', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'volume_fraction'), exist_ok=True
+        path_to_save_folder / 'volume_fraction', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'true_strain_tensor'), exist_ok=True
+        path_to_save_folder / 'true_strain_tensor', exist_ok=True
     )
     os.mkdir(
-        os.path.join(path_to_data,name_folder_midplane,'dot_product_map'), exist_ok=True
+        path_to_save_folder / 'dot_product_map', exist_ok=True
     )
+
+    func_parallel = partial(func, path_to_data=path_to_data, path_to_save_folder=path_to_save_folder)
 
     # from tqdm.contrib.concurrent import process_map
-    # process_map(func, range(1, 9), max_workers=8, smoothing=0)
-    map(func, tqdm(range(1, 9)))
+    # process_map(func_parallel, range(1, 9), max_workers=8)
+    map(func_parallel, tqdm(range(1, 9)))
 
 
 

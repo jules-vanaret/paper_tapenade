@@ -102,7 +102,7 @@ def compute_df_fromfolder(
         df = pd.concat([df, radial_distrib])
     return df
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 path_dataset1 = Path(folder) / "S8a_Hoechst_Ecad_Bra_Sox2_48_12"
 colors = ["#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377"]
 scale = (1,1,1)

@@ -104,7 +104,7 @@ def plot_and_save(path,xlabel,ylabel,yticks):
     plt.savefig(path)
     plt.show()
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 num=1 #num sample
 scale = (1,0.6,0.6)
 

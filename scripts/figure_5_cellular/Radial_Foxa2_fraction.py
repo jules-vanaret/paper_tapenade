@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 # plot 5d
 path_dataset1 = Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/big"
 path_dataset2 = Path(folder) / "2k_Hoechst_FoxA2_Oct4_Bra_78h/small"

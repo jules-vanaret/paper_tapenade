@@ -7,15 +7,12 @@
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
-import tol_colors as tc
 from skimage import io
 from scipy.optimize import linear_sum_assignment
-import napari
 from pathlib import Path
 from skimage.measure import regionprops
 
 io.use_plugin("pil")
-cset = tc.tol_cset("muted")
 
 
 def build_iou_matrix(gt_segmentation, pred_segmentation):
@@ -155,7 +152,7 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 list_z = [10, 50, 90, 130, 170, 210, 250]
 image = tifffile.imread(Path(folder)/"S2_segmentation_performances/S2f_1_2views/image.tif")
 
@@ -249,9 +246,9 @@ fig, ax = plt.subplots()
 # ax.plot(Z,Recall_u,"x--",color=cset.cyan,label='recall with one view',linewidth=4)
 
 # plot f1
-ax.plot(Z, f1_corrected, "o-", color=cset.cyan, label="two views", linewidth=3)
+ax.plot(Z, f1_corrected, "o-", color="cyan", label="two views", linewidth=3)
 ax.plot(
-    Z, f1_uncorrected, "o--", color=cset.cyan, label="one view", linewidth=3
+    Z, f1_uncorrected, "o--", color="cyan", label="one view", linewidth=3
 )
 
 

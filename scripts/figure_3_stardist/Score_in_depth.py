@@ -151,7 +151,7 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-folder = ...
+folder = Path(__file__).parents[2] / 'data'
 
 list_z = [17, 30, 60, 89, 120, 150, 180, 210]
 image = tifffile.imread(

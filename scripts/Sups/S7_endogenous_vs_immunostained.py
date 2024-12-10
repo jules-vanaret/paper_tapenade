@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import napari
 from pathlib import Path
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 
 mask = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/mask.tif")
 

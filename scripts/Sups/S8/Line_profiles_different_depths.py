@@ -5,7 +5,6 @@ from pathlib import Path
 import napari
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage as ndi
 from tapenade.preprocessing._preprocessing import (
     change_array_pixelsize,
     normalize_intensity,
@@ -32,7 +31,7 @@ def plot_profile(im2D, mask):
     return line
 
 
-folder = ...
+folder = Path(__file__).parents[3] / 'data'
 
 # colormaps by #https://personal.sron.nl/~pault/
 colors_bra = ["#FEE391", "#FE9A29", "#CC4C02", "#993404", "#662506"]

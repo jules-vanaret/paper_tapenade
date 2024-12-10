@@ -7,7 +7,6 @@
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
-import tol_colors as tc
 from skimage import io
 from scipy.optimize import linear_sum_assignment
 import napari
@@ -15,7 +14,6 @@ from pathlib import Path
 from skimage.measure import regionprops
 
 io.use_plugin("pil")
-cset = tc.tol_cset("muted")
 
 
 def build_iou_matrix(gt_segmentation, pred_segmentation):
@@ -155,7 +153,7 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
     return np.array(listTP).T
 
 
-folder = ...
+folder = path_to_data = Path(__file__).parents[3] / 'data'
 list_z = [17, 30, 60, 89, 120, 150, 180, 210]
 thresh_IoU = 0.5
 Z = []
@@ -243,9 +241,9 @@ fig, ax = plt.subplots()
 # ax.plot(Z,Recall_u,"x--",color=cset.cyan,label='recall with global normalization',linewidth=4)
 
 # plot f1
-ax.plot(Z, f1_corrected, "o-", color=cset.rose, label="Local equalization", linewidth=3)
+ax.plot(Z, f1_corrected, "o-", color="magenta", label="Local equalization", linewidth=3)
 ax.plot(
-    Z, f1_uncorrected, "o--", color=cset.rose, label="Global equalization", linewidth=3
+    Z, f1_uncorrected, "o--", color="magenta", label="Global equalization", linewidth=3
 )
 
 

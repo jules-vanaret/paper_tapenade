@@ -8,7 +8,8 @@ from skimage.measure import block_reduce
 from tapenade.preprocessing._preprocessing import change_array_pixelsize
 import scipy.ndimage as ndi
 
-folder = ...
+
+folder = Path(__file__).parents[3] / 'data'
 fig,ax = plt.subplots(1,figsize=(10,7))
 all_blue = []
 all_farred = []
