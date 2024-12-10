@@ -11,7 +11,6 @@ from skimage import io
 from pathlib import Path
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import regionprops
-import napari
 
 io.use_plugin("pil")
 
