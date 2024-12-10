@@ -2,13 +2,11 @@
 
 from pathlib import Path
 import tifffile
-import napari
 import matplotlib.pyplot as plt
 import numpy as np
 from tapenade.preprocessing import (
     masked_gaussian_smoothing,
     normalize_intensity,
-    change_array_pixelsize,
 )
 
 

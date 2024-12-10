@@ -1,7 +1,6 @@
 # Compute and plot radial profile of intensity of T-Bra during the differentiation wave, in 3D
 
 import tifffile
-import napari
 from scipy import ndimage as ndi
 from glob import glob
 from pathlib import Path

@@ -7,7 +7,6 @@ import napari
 from skimage.measure import regionprops
 import tifffile
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from tapenade.preprocessing import normalize_intensity
 from tapenade.preprocessing._smoothing import _masked_smooth_gaussian
 from pathlib import Path

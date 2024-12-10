@@ -7,15 +7,12 @@
 import tifffile
 import numpy as np
 import matplotlib.pyplot as plt
-import tol_colors as tc
 from skimage import io
 from scipy.optimize import linear_sum_assignment
-import napari
 from pathlib import Path
 from skimage.measure import regionprops
 
 io.use_plugin("pil")
-cset = tc.tol_cset("muted")
 
 
 def build_iou_matrix(gt_segmentation, pred_segmentation):
@@ -205,8 +202,8 @@ for z in list_z:
 f1_corrected = [(p + r) / 2 for p, r in zip(Precision, Recall)]
 
 fig, ax = plt.subplots()
-ax.plot(Z, Precision, "o-", color=cset.rose, label="precision", linewidth=4)
-ax.plot(Z, Recall, "o-", color=cset.cyan, label="recall", linewidth=4)
+ax.plot(Z, Precision, "o-", color="magenta", label="precision", linewidth=4)
+ax.plot(Z, Recall, "o-", color="cyan", label="recall", linewidth=4)
 ax.set_xlabel("depth(µm)", fontsize=25)
 ax.set_xticks([0, 50, 100, 150, 200])
 ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
