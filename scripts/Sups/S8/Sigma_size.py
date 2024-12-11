@@ -8,6 +8,7 @@ from tapenade.preprocessing._preprocessing import (
     change_array_pixelsize,
     normalize_intensity,
 )
+from tqdm import tqdm
 
 
 def save_fig(data, path, cmap, vmin, vmax):
@@ -40,7 +41,7 @@ for z in range(len(mask)):
     Int_hoechst_non_norm.append(np.nanmedian(hoechst_nan[z, :, :]))
 
 i = 0  # index for color change
-for sigma in [10, 20, 40]:
+for sigma in tqdm([10, 20, 40]):
     hoechst_norm = normalize_intensity(
         image=hoechst_iso,
         ref_image=hoechst_iso,
@@ -54,13 +55,13 @@ for sigma in [10, 20, 40]:
         hoechst_iso, sigmas=sigma, mask_for_volume=seg_iso, mask=mask_iso
     )
     hoechst_nan = np.where(mask_iso == 1, hoechst_smooth, np.nan).astype(float)
-    save_fig(
-        hoechst_nan[120],
-        Path(folder) / f"S8e_smoothed_hoechst_sigma_{sigma}.svg",
-        "viridis",
-        0,
-        120,
-    )
+    # save_fig(
+    #     hoechst_nan[120],
+    #     Path(folder) / f"S8e_smoothed_hoechst_sigma_{sigma}.svg",
+    #     "viridis",
+    #     0,
+    #     120,
+    # )
 
     Int_hoechst_norm = []
     for z in range(len(hoechst_iso)):
@@ -72,6 +73,7 @@ for sigma in [10, 20, 40]:
         linewidth=4,
     )
     i += 1
+
 ax.plot(
     Int_hoechst_non_norm, label="Raw data, unnormalized", color=colors[i], linewidth=4
 )
@@ -82,7 +84,7 @@ ax.set_xticks([0, 100, 200, 300])
 ax.tick_params(axis="y", labelsize=30)
 ax.tick_params(axis="x", labelsize=30)
 ax.legend(fontsize=15)
-
+fig.tight_layout()
 fig.savefig(Path(folder) / "S8e_plot.svg")
-plt.legend()
+# plt.legend()
 plt.show()

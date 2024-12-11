@@ -44,7 +44,7 @@ def get_napari_angles_cmap():
 
 
 
-path_to_data = Path(__file__).parents[2] / 'data'
+path_to_data = Path(__file__).parents[2] / 'data/data_morphology/all_quantities_midplane'
 
 cmap_vectors_nematic = get_napari_angles_cmap()
 cmap_vectors_gradient = get_napari_angles_cmap()

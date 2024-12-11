@@ -85,7 +85,7 @@ for index_organoid in tqdm(inds_organoids):
             4*max(sigmas)+1
         )
     )
-    print(im.shape)
+
     for ind, (sigma, gamma) in enumerate(zip(sigmas, [1,1,1])):
         for i in range(4*sigma+1):
             for j in range(4*sigma+1):
@@ -108,12 +108,12 @@ for index_organoid in tqdm(inds_organoids):
         )
         if sigma == sigmas[0]:
             percs_density = np.percentile(cell_density[mask], [1,99])
-            print(f'index organoid {index_organoid} percs_density {percs_density*(10/0.621)**3}')
-            print(volume_fraction[mask].min(), volume_fraction[mask].max())
+            # print(f'index organoid {index_organoid} percs_density {percs_density*(10/0.621)**3}')
+            # print(volume_fraction[mask].min(), volume_fraction[mask].max())
             percs_volume_fraction = np.percentile(volume_fraction[mask], [1,99])
-            print(f'index organoid {index_organoid} percs_volume_fraction {percs_volume_fraction}')
+            # print(f'index organoid {index_organoid} percs_volume_fraction {percs_volume_fraction}')
             percs_nuclear_volume = np.percentile(nuclear_volume[mask], [1,99])
-            print(f'index organoid {index_organoid} percs_nuclear_volume {percs_nuclear_volume * 0.621**3}')
+            # print(f'index organoid {index_organoid} percs_nuclear_volume {percs_nuclear_volume * 0.621**3}')
         
         ### -->
         cmap = matplotlib.colormaps['inferno']
@@ -276,7 +276,7 @@ for index_organoid in tqdm(inds_organoids):
     dot_product_map[~mask] = np.nan
 
     cls = np.percentile(ts_maxeig[mask], [1,99])
-    print(f'index organoid {index_organoid} percs_ts_maxeig {cls}')
+    # print(f'index organoid {index_organoid} percs_ts_maxeig {cls}')
     ts_maxeig[ts_maxeig==0] = np.nan
 
     viewer4.add_vectors(density_gradient, name='density_gradient',
@@ -290,7 +290,7 @@ for index_organoid in tqdm(inds_organoids):
     viewer4.add_points(ndim=2)
 
     cls = np.percentile(gradient_magnitude[mask], [1,99])
-    print(f'index organoid {index_organoid} percs_gradient_magnitude {cls}')
+    # print(f'index organoid {index_organoid} percs_gradient_magnitude {cls}')
     gradient_magnitude[gradient_magnitude==0] = np.nan
     viewer4.add_image(gradient_magnitude, name='gradient_magnitude', colormap='Reds')
     viewer4.add_points(ndim=2)

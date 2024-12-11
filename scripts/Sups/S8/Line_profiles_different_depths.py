@@ -10,6 +10,7 @@ from tapenade.preprocessing._preprocessing import (
     normalize_intensity,
 )
 from tapenade.preprocessing._smoothing import _masked_smooth_gaussian
+from tqdm import tqdm
 
 
 def save_fig(data, folder, cmap, vmin, vmax):
@@ -42,9 +43,9 @@ sigma_plot = 30
 sigma_norm = 11
 dz = 5  # half thickness of each subvolume around the slices
 visualize_napari = False
-im = tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\data\6.tif")
-mask = (tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\masks\6_mask.tif")).astype(bool)
-seg = tifffile.imread(rf"{folder}\5a_Dapi_Ecad_bra_sox2_725h_re\segmentation\6_seg.tif")
+im = tifffile.imread(folder / f"5a_Dapi_Ecad_bra_sox2_725h_re/data/6.tif")
+mask = (tifffile.imread(folder / f"5a_Dapi_Ecad_bra_sox2_725h_re/masks/6_mask.tif")).astype(bool)
+seg = tifffile.imread(folder / f"5a_Dapi_Ecad_bra_sox2_725h_re/segmentation/6_seg.tif")
 hoechst = im[:, 0, :, :]
 bra = im[:, 2, :, :]
 
@@ -84,7 +85,7 @@ if visualize_napari:
 
 fig, ax = plt.subplots(2, 2, figsize=(15, 9))
 
-for ind_z, z in enumerate([50, 100, 150, 200]):
+for ind_z, z in enumerate(tqdm([50, 100, 150, 200])):
     # averaging few slices around z
     bra_norm_2D = np.mean(bra_norm[z - dz : z + dz], axis=0)
     hoechst_norm_2D = np.mean(hoechst_norm[z - dz : z + dz], axis=0)
@@ -166,5 +167,6 @@ shape_axis(ax[1, 1], ymax=ymax_tbra)
 ax[0, 0].legend()
 ax[1, 0].legend()
 
-fig.savefig(rf"{folder}\S8b_plot.svg")
+fig.tight_layout()
+# fig.savefig(rf"{folder}\S8b_plot.svg")
 plt.show()

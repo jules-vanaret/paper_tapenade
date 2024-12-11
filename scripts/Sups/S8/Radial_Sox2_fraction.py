@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+
 def compute_edt_from_mask(mask, scale):
     """
     Compute the euclidean distance transform from a mask, that will be used to compute distances from each point to the border of the gastruloid
@@ -123,8 +124,9 @@ plt.ylabel("Fraction of Sox2+ cells", fontsize=30)
 plt.legend(fontsize=30)
 plt.xticks([0, 0.2, 0.4, 0.6, 0.8], fontsize=30)
 plt.yticks([0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08], fontsize=30)
+plt.tight_layout()
 plt.show()
-fig.savefig(Path(folder) / "S8a_plot.svg")
+# fig.savefig(Path(folder) / "S8a_plot.svg")
 
 viewer=napari.Viewer()
 paths = sorted(glob(str(Path(path_dataset1) / "sox2_norm/*.tif")))

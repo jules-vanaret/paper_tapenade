@@ -35,7 +35,7 @@ sigma = 35
 scale = (1, 1, 1)
 
 visualize_napari = True
-save_2D_maps = True
+save_2D_maps = False
 z = 85  # if save_2D_maps is True, the z plane to look at
 #S6b : Path(folder) / f"S6b_proliferation/10b/1_data.tif"
 mask = tifffile.imread(Path(folder) / f"4b_proliferation/4_mask.tif")
@@ -81,15 +81,15 @@ proliferation = division_density_map / cell_density_map
 division_density_map[mask == 0] = np.nan
 cell_density_map[mask == 0] = np.nan
 
-tifffile.imwrite(
-    Path(folder) / f"4b_proliferation/4_proliferation.tif", proliferation
-)
-tifffile.imwrite(
-    Path(folder) / f"4b_proliferation/4_celldens.tif", cell_density_map
-)
-tifffile.imwrite(
-    Path(folder) / f"4b_proliferation/4_divdens.tif", division_density_map
-)
+# tifffile.imwrite(
+#     Path(folder) / f"4b_proliferation/4_proliferation.tif", proliferation
+# )
+# tifffile.imwrite(
+#     Path(folder) / f"4b_proliferation/4_celldens.tif", cell_density_map
+# )
+# tifffile.imwrite(
+#     Path(folder) / f"4b_proliferation/4_divdens.tif", division_density_map
+# )
 
 if visualize_napari:
     viewer = napari.Viewer()

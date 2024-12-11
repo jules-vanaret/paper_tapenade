@@ -77,43 +77,44 @@ Hoechst_2D = np.mean(Hoechst[z - half_thickness : z + half_thickness], axis=0)
 Tbra_norm_2D[np.isnan(Tbra_norm_2D)] = 0
 Hoechst_norm_2D[np.isnan(Hoechst_norm_2D)] = 0
 
-save_fig(
-    Tbra_2D,
-    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_2D.svg",
-    "gray_r",
-    0,
-    150,
-)
-save_fig(
-    Hoechst_2D,
-    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_2D.svg",
-    "gray_r",
-    0,
-    150,
-)
-save_fig(
-    Tbra_norm_2D,
-    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_norm_2D.svg",
-    "gray_r",
-    0,
-    500,
-)
-save_fig(
-    Hoechst_norm_2D,
-    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_norm_2D.svg",
-    "gray_r",
-    0,
-    500,
-)
-save_fig(
-    Hoechst_smooth[z],
-    Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_smooth.svg",
-    "turbo",
-    0,
-    200,
-)
+if False:
+    save_fig(
+        Tbra_2D,
+        Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_2D.svg",
+        "gray_r",
+        0,
+        150,
+    )
+    save_fig(
+        Hoechst_2D,
+        Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_2D.svg",
+        "gray_r",
+        0,
+        150,
+    )
+    save_fig(
+        Tbra_norm_2D,
+        Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Tbra_norm_2D.svg",
+        "gray_r",
+        0,
+        500,
+    )
+    save_fig(
+        Hoechst_norm_2D,
+        Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_norm_2D.svg",
+        "gray_r",
+        0,
+        500,
+    )
+    save_fig(
+        Hoechst_smooth[z],
+        Path(folder) / "5a_Dapi_Ecad_bra_sox2_725h_re/Hoechst_smooth.svg",
+        "turbo",
+        0,
+        200,
+    )
 
-fig, ax = plt.subplots(2, figsize=(7, 9))
+fig, ax = plt.subplots(2, figsize=(14, 18))
 # signal is smoothed to extract large scale variations
 Tbra_norm_gauss = masked_gaussian_smoothing(
     image=Tbra_norm_2D, mask=mask_2D, sigmas=sigma_plot
@@ -179,5 +180,6 @@ lines_0, labels_0 = ax[1].get_legend_handles_labels()
 lines_0_1, labels_0_1 = ax1_twin.get_legend_handles_labels()
 ax[1].legend(lines_0 + lines_0_1, labels_0 + labels_0_1, fontsize=25)
 
-fig.savefig(Path(folder) / "5a_plot.svg")
+fig.tight_layout()
+# fig.savefig(Path(folder) / "5a_plot.svg")
 plt.show()

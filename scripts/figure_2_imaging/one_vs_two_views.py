@@ -31,7 +31,7 @@ int_twoviews = list_intensities(twoviews, mask_twoviews)
 list_depths_2sides = np.arange(0, len(twoviews))
 
 
-fig, ax = plt.subplots(1, figsize=(5, 4))
+fig, ax = plt.subplots(1, figsize=(10, 8))
 plt.plot(
     list_depths_2sides,
     int_twoviews,
@@ -46,7 +46,8 @@ plt.title("Averaged intensity for one\n vs two views imaging", fontsize=30)
 plt.legend(loc="lower left", prop={"size": 20})
 plt.xticks([0, 100, 200, 300], fontsize=20)
 plt.yticks([0, 100, 200], fontsize=20)
-plt.savefig(Path(folder) / "2f_plot.svg")
+plt.tight_layout()
+# plt.savefig(Path(folder) / "2f_plot.svg")
 plt.show()
 
 
@@ -56,4 +57,5 @@ viewer.add_image(oneview_top, colormap="gray_r")
 viewer.add_image(twoviews, colormap="gray_r")
 for l in viewer.layers:
     l.data = np.transpose(l.data, (1, 0, 2))
+viewer.grid.enabled = True
 napari.run()

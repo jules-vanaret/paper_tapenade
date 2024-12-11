@@ -230,7 +230,8 @@ plt.xlabel("sample number", fontsize=25)
 plt.xticks([])
 plt.yticks(fontsize=25)
 plt.legend(fontsize=20)
-fig.savefig(
-    Path(folder) /"S2b_plot.svg"
-)
+plt.tight_layout()
+# fig.savefig(
+#     Path(folder) /"S2b_plot.svg"
+# )
 plt.show()

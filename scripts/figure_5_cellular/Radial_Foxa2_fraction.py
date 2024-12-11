@@ -133,9 +133,9 @@ df_2 = compute_df_fromfolder(
 )
 
 fig = plt.figure(figsize=(14, 10))
-sns.lineplot(data=df_1, x="Layer", y="Mean", ci="sd", linewidth=3, color="plum")
+sns.lineplot(data=df_1, x="Layer", y="Mean", ci="sd", linewidth=3, color="plum", label="big gastruloids")
 sns.lineplot(
-    data=df_2, x="Layer", y="Mean", linewidth=3, ci="sd", color="mediumaquamarine"
+    data=df_2, x="Layer", y="Mean", linewidth=3, ci="sd", color="mediumaquamarine", label="small gastruloids"
 )
 
 plt.xlabel("Relative distance to the border", fontsize=30)
@@ -144,4 +144,4 @@ plt.legend(fontsize=30)
 plt.xticks([0, 0.2, 0.4, 0.6, 0.8], fontsize=30)
 plt.yticks([0.03,0.04,0.05,0.06,0.07,0.08], fontsize=30)
 plt.show()
-fig.savefig(Path(folder) / "5d_plot.svg")
+# fig.savefig(Path(folder) / "5d_plot.svg")

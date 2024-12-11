@@ -9,7 +9,6 @@ import matplotlib.cm as cm
 from tqdm import tqdm
 from scipy.optimize import curve_fit
 from skimage.measure import label, regionprops
-import scipy.ndimage as ndi
 from tqdm import tqdm
 from pathlib import Path
 
@@ -102,7 +101,7 @@ def process_samples(df, subfolder, channel, plans_to_cut,column_bool,normalizati
             mask = tifffile.imread(Path(folder)/f'S3_wavelength/{subfolder}/crops/{num+1}.tif') #here we read the column mask previously done but this is where the function column_mask should be called
         else :
             mask = tifffile.imread(Path(folder) / f"S3_wavelength/{subfolder}/masks/{num+1}.tif")
-        print(image.shape)
+        # print(image.shape)
         image_channel = image[:, channel, :, :]
         df = concatenate_df(
             df,
@@ -213,8 +212,9 @@ plt.plot(depth_green, expon_fit_green, color=colors[1],linewidth=2,linestyle='--
 plt.plot(depth_red, expon_fit_red, color=colors[2],linewidth=2,linestyle='--',label='exponential fit red')
 plt.plot(depth_farred, expon_fit_farred, color=colors[3],linewidth=2,linestyle='--',label='exponential fit farred')
 plt.xticks([0,100,200,300],fontsize=30)
-plt.show()
-fig.savefig(Path(folder)/'S3a_plot.svg')
+plt.tight_layout()
+# plt.show()
+# fig.savefig(Path(folder)/'S3a_plot.svg')
 
     
 fig, ax = plt.subplots(2, 1, figsize=(6, 10))
@@ -239,7 +239,6 @@ ax[1].tick_params(axis='both', which='major', labelsize=25)
 ax[1].set_xticks(wavelengths)
 ax[1].set_yticks([round(mean_d[0]/m,2) for m in mean_d])
 plt.legend()
-fig.savefig(Path(folder)/'S3_c_d_plot.svg')
+plt.tight_layout()
+# fig.savefig(Path(folder)/'S3_c_d_plot.svg')
 plt.show()
-
-napari.run()

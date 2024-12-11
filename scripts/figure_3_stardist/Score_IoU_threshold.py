@@ -11,6 +11,7 @@ from skimage import io
 from pathlib import Path
 from scipy.optimize import linear_sum_assignment
 from skimage.measure import regionprops
+from tqdm import tqdm
 
 io.use_plugin("pil")
 
@@ -162,7 +163,7 @@ colors = [
     "#FFAABB",
 ]
 
-for ind_thresh, thresh_IoU in enumerate(list_IOUs):
+for ind_thresh, thresh_IoU in enumerate(tqdm(list_IOUs)):
     for indz, z in enumerate(list_z):
         dapi = image[z, 0, :, :]
         annotation = tifffile.imread(
@@ -205,5 +206,6 @@ ax.tick_params(axis="x", labelsize=25)
 ax.set_xlabel("IoU threshold", fontsize=25)
 ax.set_ylabel("f1 score", fontsize=25)
 plt.legend()
-plt.savefig(Path(folder) / "3d_2_plot.svg")
+plt.tight_layout()
+# plt.savefig(Path(folder) / "3d_2_plot.svg")
 plt.show()

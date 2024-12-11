@@ -101,15 +101,16 @@ def plot_and_save(path,xlabel,ylabel,yticks):
     plt.xticks([0,100,200,300],fontsize=30)
     plt.yticks(yticks,fontsize=30)
     plt.legend()
-    plt.savefig(path)
+    plt.tight_layout()
+    # plt.savefig(path)
     plt.show()
 
 folder = Path(__file__).parents[3] / 'data'
 num=1 #num sample
 scale = (1,0.6,0.6)
 
-im = tifffile.imread(Path(folder) / f'S3_wavelength/hoechst_and_draq5\{num}.tif')
-mask = tifffile.imread(Path(folder) / f'S3_wavelength/hoechst_and_draq5\masks\{num}.tif')
+im = tifffile.imread(Path(folder) / f'S3_wavelength/hoechst_and_draq5/{num}.tif')
+mask = tifffile.imread(Path(folder) / f'S3_wavelength/hoechst_and_draq5/masks/{num}.tif')
 farred = im[:,3,:,:]
 blue = im[:,0,:,:]
 blue_iso = change_array_pixelsize(array=blue,input_pixelsize=scale)

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import napari
 from pathlib import Path
 
-folder = Path(__file__).parents[3] / 'data'
+folder = Path(__file__).parents[2] / 'data'
 
 mask = tifffile.imread(Path(folder)/"S7_endogenous_vs_immunostained/mask.tif")
 
@@ -225,7 +225,7 @@ plot(
     "Endogenous signal (A.U)",
     "Immunostained signal (A.U)",
 )
-plt.savefig(Path(folder)/"S7_b_c.png")
+# plt.savefig(Path(folder)/"S7_b_c.png")
 
 
 # ### SECOND FIGURE: Normalization, full img + 3 depths
@@ -238,5 +238,5 @@ plot(
     "Endogenous signal normalized (A.U)",
     "Immunostained signal \n normalized (A.U)",
 )
-plt.savefig(Path(folder)/"S7_d.png")
+# plt.savefig(Path(folder)/"S7_d.png")
 plt.show()

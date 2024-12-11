@@ -3,7 +3,7 @@ import napari
 from pathlib import Path
 
 
-path_to_data = Path(__file__).parents[2] / 'data'
+path_to_data = Path(__file__).parents[2] / 'data/datasets_for_stardist'
 
 data_dict = {
     'annotator1': ['image1.tif', 'label1.tif'],
@@ -17,11 +17,11 @@ for name in ['annotator1', 'annotator2']:
     for name_data, name_labels in zip(data_dict[name][::2], data_dict[name][1::2]):
 
         data = tifffile.imread(
-            f'{path_to_data}/datasets_for_stardist/{name}/{name_data}'
+            f'{path_to_data}/{name}/{name_data}'
         )
 
         labels = tifffile.imread(
-            f'{path_to_data}/datasets_for_stardist/{name}/{name_labels}'
+            f'{path_to_data}/{name}/{name_labels}'
         )
         if data.ndim == 4:
             data = data[14]
