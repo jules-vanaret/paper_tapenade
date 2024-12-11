@@ -13,7 +13,7 @@ if __name__ == '__main__':
     # url of the data
     url=requests.get('...', stream=True)
 
-    # Sizes in bytes.
+    # Sizes in bytes
     block_size = 1024
 
     # Create the zip file
@@ -29,6 +29,6 @@ if __name__ == '__main__':
         zip_ref.extractall(os.path.join(script_dir, './'))
 
     # remove initial folder
-    folder_path = pathlib.Path(script_dir / filename)
+    folder_path = script_dir / filename
     folder_path.unlink()
     
