@@ -19,6 +19,6 @@ If you prefer, you can also download the data manually from Zenodo and extract t
 
 # Running the scripts
 
-After running the script `download_data_from_zenodo.py`, all scripts can be run without any modification. Scripts are located in folders named after the main figure they (partly) generate.
+After the `data` folder has been filled, all scripts can be run without any modification. Scripts are located in folders named after the main figure they (partly) generate.
 
 
