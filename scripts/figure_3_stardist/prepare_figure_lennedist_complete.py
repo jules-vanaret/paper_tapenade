@@ -3,7 +3,7 @@ import napari
 from pathlib import Path
 
 
-path_to_data = Path(__file__).parents[2] / 'data/datasets_for_stardist'
+path_to_data = Path(__file__).parents[2] / 'data/stardist_training_datasets'
 
 data_dict = {
     'annotator1': ['image1.tif', 'label1.tif'],
