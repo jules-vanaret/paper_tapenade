@@ -14,7 +14,8 @@ They can be installed using [pip](https://pip.pypa.io/en/stable/getting-started/
 # Before running the scripts
 
 Before running the main scripts (e.g to generate the figures), our datasets needs to be downloaded from Zenodo. 
-To do so, we recommend running the script `download_data_from_zenodo.py`, which will automatically download the data and extract it in the `data` folder. 
+To do so, we recommend running the script `download_data_from_zenodo.py`, which will automatically download the data and extract it in the `data` folder.
+If you prefer, you can also download the data manually from Zenodo and extract the zip file in the `data` folder.
 
 # Running the scripts
 
