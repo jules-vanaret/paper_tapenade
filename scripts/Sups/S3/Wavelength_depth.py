@@ -7,6 +7,7 @@ import seaborn as sns
 import warnings
 import matplotlib.cm as cm
 from tqdm import tqdm
+import scipy.ndimage as ndi
 from scipy.optimize import curve_fit
 from skimage.measure import label, regionprops
 from tqdm import tqdm
@@ -21,7 +22,7 @@ def column_mask(image,mask,half_size=60): #not run here
     column_mask[column_mask==0]=np.nan
     return column_mask
 
-def intensity_per_plane(image, mask,num_sample:int=0):
+def intensity_per_plane(image, mask,num_sample:int=0,cut_first_slices:bool=True):
     df= pd.DataFrame(columns=['Sample', 'Depth', 'Intensity'])
     float_image=image.astype(float)
     if np.isnan(mask).any()==False:
@@ -42,28 +43,6 @@ def normalize_df_column_to_max(df):
     df["Intensity"] /= df["Intensity"].max()
     return df
 
-def cut_first_slices(image,nb:int=0):
-    shape = image.shape
-    new_image = np.zeros((shape[0]-nb,shape[1],shape[2]))
-    new_image=image[nb:,:,:]
-    return new_image
-
-def concatenate_df(df,image,num_sample,mask,normalize:bool=True,return_image:bool=False,plans_to_cut:list=[]):
-    image = image*mask
-    if normalize==True:
-        image = cut_first_slices(image,plans_to_cut[num_sample])
-        mask = cut_first_slices(mask,plans_to_cut[num_sample])
-
-    df_intensity = intensity_per_plane(image,mask,num_sample=num_sample)
-    if normalize==True:
-        df_intensity= normalize_df_column_to_max(df_intensity)
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action='ignore', message='The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.')
-        df = pd.concat([df, df_intensity])
-    if return_image==True:
-        return df,image
-    else:
-        return df
      
 def find_expon_parameters(df):
     mean = df.groupby('Depth').mean()
@@ -84,33 +63,53 @@ def compute_d_from_df(list_d,df_image,ind):
     for num_sample in list_samples:
         df_image_sample = df_image[df_image['Sample']==num_sample]
         expon_fit,popt,depth = find_expon_parameters(df_image_sample)
-        if plot_individual_fits_bool==True :
-            plt.plot(depth, expon_fit,label=str(wavelengths[ind])+'_'+str(num_sample),color=cm.Greens(0.3+num_sample/len(list_samples)))
+        # plt.plot(depth, expon_fit,label=str(wavelengths[ind])+'_'+str(num_sample),color=cm.Greens(0.3+num_sample/len(list_samples))) #to plot each individual fit instead of one fit on the average
         list_d[ind].append(popt[0])
     return list_d
 
 
-def process_samples(df, subfolder, channel, plans_to_cut,column_bool,normalization_bool):
-    """Process all samples for a given dataset."""
+def process_samples(df, subfolder, channel,column_bool,normalization_bool):
+    """Process all samples for a given dataset.
+    Read masks and image, compute a mask of the central column, cut first slices to normalize the profile and compute a dataframe with all the intensities, sammples and depths."""
     # if processing every sample in the folder
-    # samples = tifffile.imread(str(Path(folder) / f"S3_wavelength/{subfolder}/*.tif"))
-    # for num, image in tqdm(enumerate(samples), desc=f"Processing {subfolder}"):
-    for num in tqdm(range(1), desc=f"Processing {subfolder}"):
-        image = tifffile.imread(Path(folder) / f"S3_wavelength/{subfolder}/{num+1}.tif")
+    samples = tifffile.imread(str(Path(folder) / f"{subfolder}/data/*.tif"))
+    for num, image in tqdm(enumerate(samples), desc=f"Processing {subfolder}"):
+        mask_sample = tifffile.imread(Path(folder) / f"{subfolder}/masks/{num+1}.tif")
+        image_channel = image[:, channel, :, :] #if input data is multichannel
         if column_bool==True:
-            mask = tifffile.imread(Path(folder)/f'S3_wavelength/{subfolder}/crops/{num+1}.tif') #here we read the column mask previously done but this is where the function column_mask should be called
+            # mask = tifffile.imread(Path(folder)/f'{subfolder}/crops/{num+1}.tif') #reading the column mask previously done
+            mask = column_mask(image_channel,mask_sample)
         else :
-            mask = tifffile.imread(Path(folder) / f"S3_wavelength/{subfolder}/masks/{num+1}.tif")
-        # print(image.shape)
-        image_channel = image[:, channel, :, :]
-        df = concatenate_df(
+            mask=mask_sample
+        if normalization_bool==True:
+            image,mask = cut_first_slices(image_channel,mask)
+        df = compute_and_concat_df(
             df,
-            image=image_channel,
+            image=image,
             mask=mask,
             num_sample=num,
-            normalize=normalization_bool,
-            plans_to_cut=plans_to_cut,
+            normalize=normalization_bool
         )
+    return df
+
+def cut_first_slices(image,mask):
+    shape = image.shape
+    image_blurred = (ndi.gaussian_filter(image,sigma=1)).astype(float)
+    image_blurred[mask==0]=np.nan
+    intensity = [np.nanmean((image_blurred)[z]) for z in range(len(image_blurred))]
+    ind_max_intensity = np.argwhere(intensity==np.nanmax(intensity))[0][0] #index of depth where intensity starts to decrease
+    new_image = np.zeros((shape[0]-ind_max_intensity,shape[1],shape[2]))
+    new_image=image[ind_max_intensity:,:,:]
+    new_mask = mask[ind_max_intensity:,:,:]
+    return new_image,new_mask
+
+def compute_and_concat_df(df,image,num_sample,mask,normalize:bool=True):
+    df_intensity = intensity_per_plane(image,mask,num_sample=num_sample)
+    if normalize==True:
+        df_intensity= normalize_df_column_to_max(df_intensity) #put max at 1
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='ignore', message='The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.')
+        df = pd.concat([df, df_intensity])
     return df
 
 fig,ax = plt.subplots(1,figsize=(10,7))
@@ -120,34 +119,22 @@ colors = ['#1965B0','#4EB265','#E8601C','#882E72']
 
 wavelengths=[405,488,555,647]
 std_ratios = [0,0,0,0]
-normalization_bool = True
-column_bool=True #if not, we look at the decay in the full sample, not in a central column
-plot_individual_fits_bool=False
-
-#aligning manaually the decaying curves the their maximum
-plans_to_cut_farred = [57,35,44,25]
-plans_to_cut_red = [25,35,25,25,25]
-plans_to_cut_red_tdt = [15,25,20,25,15,15]
-plans_to_cut_green_1 = [30,15,40,35,60,50,30]
-plans_to_cut_green_2=[30,30,30,10,40,20,30]
-plans_to_cut_blue1 = [16,16,10,10,16]
-plans_to_cut_blue2 = [25,30,20,25,30]
-
+normalization_bool = True #if True, we normalize the intensities by the maximum intensity in the full sample (max is 1) and remove first planes to only look at the decrease
+column_bool=True #if not, we look at the decay in the full sample, not in a central column. in the paper : True
 
 dfs = {}
 dfs["blue"] = process_samples(
     pd.DataFrame(columns=["Sample", "Depth", "Intensity"]),
     subfolder=f"hoechst_and_spy555",
-    channel=0, #using only the blue channel
-    plans_to_cut=plans_to_cut_blue1,
+    channel=0, #using only the blue channel.
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
+
 dfs["blue"] = process_samples(
     dfs["blue"],
     subfolder=f"hoechst_and_draq5",
     channel=0, #we only use the blue channel, and add the intensities to the previous dataframe, to gather the different hoechst
-    plans_to_cut=plans_to_cut_blue2,
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
@@ -156,7 +143,6 @@ dfs["green"] = process_samples(
     pd.DataFrame(columns=["Sample", "Depth", "Intensity"]),
     subfolder=f"488_spydna",
     channel=1,
-    plans_to_cut=plans_to_cut_green_1,
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
@@ -165,7 +151,6 @@ dfs["red"] = process_samples(
     pd.DataFrame(columns=["Sample", "Depth", "Intensity"]),
     subfolder=f"555_spydna",
     channel=2,
-    plans_to_cut=plans_to_cut_red,
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
@@ -174,7 +159,6 @@ dfs["red"] = process_samples(
     dfs["red"],
     subfolder=f"555_tdt",
     channel=2,
-    plans_to_cut=plans_to_cut_red_tdt,
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
@@ -183,11 +167,10 @@ dfs["farred"] = process_samples(
     pd.DataFrame(columns=["Sample", "Depth", "Intensity"]),
     subfolder=f"647_draq5",
     channel=3,
-    plans_to_cut=plans_to_cut_farred,
     column_bool=column_bool,
     normalization_bool=normalization_bool,
 )
-sns.lineplot(data=dfs["blue"], x="Depth", y="Intensity", linewidth=3, color=colors[0], ci="sd")
+sns.lineplot(data=dfs["blue"], x="Depth", y="Intensity", linewidth=3, color=colors[0], ci="sd",hue='Sample') #hue='Sample' plots every individual sample as a line, instead of the average + std.
 sns.lineplot(data=dfs["green"], x="Depth", y="Intensity", linewidth=3, color=colors[1], ci="sd")
 sns.lineplot(data=dfs["red"], x="Depth", y="Intensity", linewidth=3, color=colors[2], ci="sd")
 sns.lineplot(data=dfs["farred"], x="Depth", y="Intensity", linewidth=3, color=colors[3], ci="sd")
@@ -196,7 +179,7 @@ plt.xlabel('Depth z (µm)',fontsize=30)
 plt.ylabel('Normalized intensity in \n a central crop (A.U.)',fontsize=30)
 plt.xticks([0,100,200,300],fontsize=30)
 plt.yticks([0,0.2,0.4,0.6,0.8,1],fontsize=30)
-
+plt.show()
 expon_fit_blue,popt_blue,depth_blue = find_expon_parameters(dfs["blue"])
 expon_fit_green,popt_green,depth_green = find_expon_parameters(dfs["green"])
 expon_fit_red,popt_red,depth_red = find_expon_parameters(dfs["red"]) 
