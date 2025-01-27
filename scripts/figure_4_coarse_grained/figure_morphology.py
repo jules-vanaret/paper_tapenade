@@ -1,3 +1,8 @@
+# This script is used to generate the 2D maps of cell density, volume fraction, nuclear volume,
+# true strain magnitude, and dot product between density gradient and true strain major axis
+# All fields are displayed in Napari windows using precomputed data located in the folder
+# "4acd_data_morphology/all_quantities_midplane"
+
 import napari
 import tifffile
 import numpy as np
@@ -5,6 +10,12 @@ from tqdm import tqdm
 import matplotlib
 from magicgui import magicgui
 from pathlib import Path
+
+
+path_to_data = Path(__file__).parents[2] / 'data/4acd_data_morphology/all_quantities_midplane'
+# CHANGE THE INDICES IN THE LIST (from 1 to 8) IF YOU WANT TO DISPLAY MORE ORGANOIDS
+inds_organoids = [6]
+sigmas = [10,20,40] # pixels
 
 
 
@@ -43,17 +54,9 @@ def get_napari_angles_cmap():
 
     return cmap
 
-path_to_data = path_to_data = Path(__file__).parents[2] / 'data/4acd_data_morphology/all_quantities_midplane'
 
 cmap_vectors_nematic = get_napari_angles_cmap()
 cmap_vectors_gradient = get_napari_angles_cmap()
-
-
-inds_organoids = [6]
-
-
-sigmas = [10,20,40]
-
 
 
 
@@ -63,8 +66,6 @@ for index_organoid in tqdm(inds_organoids):
     viewer2 = napari.Viewer()
     viewer3 = napari.Viewer()
     viewer4 = napari.Viewer()
-    # viewer5 = napari.Viewer()
-    # viewer6 = napari.Viewer()
 
     labels = tifffile.imread(
         path_to_data / f'labels/ag{index_organoid}_norm_labels.tif'
@@ -127,9 +128,6 @@ for index_organoid in tqdm(inds_organoids):
                     im_cmap_density[i,j] = cmap(imrgb[i,j])
         
         viewer2.add_image(im_cmap_density, opacity=1)
-        # viewer2.add_image(cell_density.copy(), colormap='blues', 
-        #     opacity=1, contrast_limits=percs_density
-        # )
         viewer2.layers[-1].gamma = gamma
         viewer2.add_labels(mask*1)
         viewer2.layers[-1].contour=4
@@ -145,9 +143,6 @@ for index_organoid in tqdm(inds_organoids):
                     im_cmap_vf[i,j] = cmap(imrgb[i,j])
 
         viewer2.add_image(im_cmap_vf, opacity=1)
-        # viewer2.add_image(volume_fraction.copy(), colormap='greens', 
-        #     opacity=1, contrast_limits=percs_volume_fraction
-        # )
         viewer2.layers[-1].gamma = gamma
         viewer2.add_labels(mask*1)
         viewer2.layers[-1].contour=4
@@ -163,9 +158,6 @@ for index_organoid in tqdm(inds_organoids):
                     im_cmap_nv[i,j] = cmap(imrgb[i,j])
 
         viewer2.add_image(im_cmap_nv, opacity=1)
-        # viewer2.add_image(nuclear_volume.copy(), colormap='reds', 
-        #     opacity=1, contrast_limits=percs_nuclear_volume
-        # )
         viewer2.layers[-1].gamma = gamma
         viewer2.add_labels(mask*1)
         viewer2.layers[-1].contour=4
@@ -243,9 +235,6 @@ for index_organoid in tqdm(inds_organoids):
     viewer3.grid.shape = (2, -1)
     viewer3.grid.stride = -2
 
-    ### VIEWER 5 (snapshots of true strain)
-    # viewer5.add_image(data[162:392, 65:291])
-
 
     ### VIEWER 4
     density_gradient = np.load(
@@ -276,7 +265,6 @@ for index_organoid in tqdm(inds_organoids):
     dot_product_map[~mask] = np.nan
 
     cls = np.percentile(ts_maxeig[mask], [1,99])
-    # print(f'index organoid {index_organoid} percs_ts_maxeig {cls}')
     ts_maxeig[ts_maxeig==0] = np.nan
 
     viewer4.add_vectors(density_gradient, name='density_gradient',
@@ -290,7 +278,6 @@ for index_organoid in tqdm(inds_organoids):
     viewer4.add_points(ndim=2)
 
     cls = np.percentile(gradient_magnitude[mask], [1,99])
-    # print(f'index organoid {index_organoid} percs_gradient_magnitude {cls}')
     gradient_magnitude[gradient_magnitude==0] = np.nan
     viewer4.add_image(gradient_magnitude, name='gradient_magnitude', colormap='Reds')
     viewer4.add_points(ndim=2)
