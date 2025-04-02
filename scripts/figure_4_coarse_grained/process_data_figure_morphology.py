@@ -417,7 +417,7 @@ def main_processing_function(index_organoid):
     )
 
     positions_on_grid = positions_on_grid[
-        mask[positions_on_grid[:, 0], positions_on_grid[:, 1], positions_on_grid[:, 2]]
+        np.where(mask[(positions_on_grid[:, 0], positions_on_grid[:, 1], positions_on_grid[:, 2])])
     ]
 
     # Compute the cell density
