@@ -1,7 +1,5 @@
-# This script is used to generate the 2D maps of cell density, volume fraction, nuclear volume,
-# true strain magnitude, and dot product between density gradient and true strain major axis
-# All fields are displayed in Napari windows using precomputed data located in the folder
-# "4acd_data_morphology/all_quantities_midplane"
+# This script is used to generate a figure identical to the one obtained using "figure_morphology.py"
+# but using orthogonal slices instead of midplane slices.
 
 import napari
 import tifffile
@@ -68,14 +66,16 @@ for index_organoid in tqdm(inds_organoids):
     viewer4 = napari.Viewer()
 
     labels = tifffile.imread(
-        path_to_data / f'labels/ag{index_organoid}_norm_labels.tif'
+        path_to_data / f'labels/ag{index_organoid}_norm_labels_ortho.tif'
     )
     data = tifffile.imread(
-        path_to_data / f'data/ag{index_organoid}_norm.tif'
+        path_to_data / f'data/ag{index_organoid}_norm_ortho.tif'
     )
     mask = tifffile.imread(
-        path_to_data / f'mask/ag{index_organoid}_mask.tif'
+        path_to_data / f'mask/ag{index_organoid}_mask_ortho.tif'
     )
+
+    print(labels.shape, data.shape, mask.shape)
 
     
 
@@ -98,13 +98,13 @@ for index_organoid in tqdm(inds_organoids):
 
 
         cell_density = tifffile.imread(
-            path_to_data / f'cell_density/ag{index_organoid}_sigma{sigma}.tif'
+            path_to_data / f'cell_density/ag{index_organoid}_sigma{sigma}_ortho.tif'
         )
         volume_fraction = tifffile.imread(
-            path_to_data / f'volume_fraction/ag{index_organoid}_sigma{sigma}.tif'
+            path_to_data / f'volume_fraction/ag{index_organoid}_sigma{sigma}_ortho.tif'
         )
         nuclear_volume = tifffile.imread(
-            path_to_data / f'nuclear_volume/ag{index_organoid}_sigma{sigma}.tif'
+            path_to_data / f'nuclear_volume/ag{index_organoid}_sigma{sigma}_ortho.tif'
         )
         if sigma == sigmas[0]:
             percs_density = np.percentile(cell_density[mask], [1,99])
@@ -172,7 +172,13 @@ for index_organoid in tqdm(inds_organoids):
 
     im_cmap = im_cmap[:,::-1]
 
-    im_cmap_big = np.zeros((mask.shape[0], mask.shape[1], 4))
+    im_cmap_big = np.zeros(
+        (
+            max([mask.shape[0], im_cmap.shape[0]]), 
+            max([mask.shape[1], im_cmap.shape[1]]), 
+            4
+        )
+    )
     im_cmap_big[-im_cmap.shape[0]:, -im_cmap.shape[1]:] = im_cmap
 
     viewer1.add_image(im_cmap_big, opacity=1, colormap='inferno')
@@ -187,23 +193,23 @@ for index_organoid in tqdm(inds_organoids):
 
     ### VIEWER 3
     napari_true_strain = np.load(
-        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}.npy'
+        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_ortho.npy'
     )
     lengths = np.linalg.norm(napari_true_strain[:,1], axis=1)
     napari_true_strain[:,1] = napari_true_strain[:,1]/np.median(lengths[:,None]) * 5
 
     napari_true_strain_angles = np.load(
-        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_angles.npy'
+        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_angles_ortho.npy'
     )
 
     napari_true_strain_resampled = np.load(
-        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_resampled.npy'
+        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_resampled_ortho.npy'
     )
     lengths = np.linalg.norm(napari_true_strain_resampled[:,1], axis=1)
     napari_true_strain_resampled[:,1] = napari_true_strain_resampled[:,1]/np.median(lengths[:,None]) * 5
 
     napari_true_strain_resampled_angles = np.load(
-        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_resampled_angles.npy'
+        path_to_data / f'true_strain_tensor/ag{index_organoid}_sigma{sigmas[0]}_resampled_angles_ortho.npy'
     )
 
     viewer3.add_image(data, colormap='gray_r', contrast_limits=[0.14,0.5],name='data')
@@ -233,29 +239,29 @@ for index_organoid in tqdm(inds_organoids):
 
     ### VIEWER 4
     density_gradient = np.load(
-        path_to_data / f'cell_density_gradient/ag{index_organoid}.npy'
+        path_to_data / f'cell_density_gradient/ag{index_organoid}_ortho.npy'
     )
     lengths = np.linalg.norm(density_gradient[:,1], axis=1)
     density_gradient[:,1] = density_gradient[:,1]/np.median(lengths[:,None]) * 5
 
     density_gradient_angles = np.load(
-        path_to_data / f'cell_density_gradient/ag{index_organoid}_angles.npy'
+        path_to_data / f'cell_density_gradient/ag{index_organoid}_angles_ortho.npy'
     )
 
     gradient_magnitude = tifffile.imread(
-        path_to_data / f'cell_density_gradient_mag/ag{index_organoid}.tif'
+        path_to_data / f'cell_density_gradient_mag/ag{index_organoid}_ortho.tif'
     )
 
     ts_maxeig = tifffile.imread(
-        path_to_data / f'true_strain_maxeig/ag{index_organoid}_sigma40.tif'
+        path_to_data / f'true_strain_maxeig/ag{index_organoid}_sigma40_ortho.tif'
     )
 
     ts_maxeig_cellular = tifffile.imread(
-        path_to_data / f'true_strain_maxeig/ag{index_organoid}.tif'
+        path_to_data / f'true_strain_maxeig/ag{index_organoid}_ortho.tif'
     )
 
     dot_product_map = tifffile.imread(
-        path_to_data / f'dot_product_map/ag{index_organoid}.tif'
+        path_to_data / f'dot_product_map/ag{index_organoid}_ortho.tif'
     )
     dot_product_map[~mask] = np.nan
 
@@ -339,7 +345,9 @@ for index_organoid in tqdm(inds_organoids):
     viewer3.window.add_dock_widget(widget_angle_shift, area='right')
     viewer4.window.add_dock_widget(widget_angle_shift2, area='right')
 
-
-
+    viewer1.reset_view()
+    viewer2.reset_view()
+    viewer3.reset_view()
+    viewer4.reset_view()
 
 napari.run()

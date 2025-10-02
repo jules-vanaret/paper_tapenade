@@ -24,8 +24,16 @@ from skimage.morphology import binary_erosion
 path_to_data = Path(__file__).parents[2] / "data/4acd_data_morphology"
 name_folder_midplane = "all_quantities_midplane"
 # CHANGE THE INDICES IN THE LIST (from 1 to 8) IF YOU WANT TO DISPLAY MORE ORGANOIDS
-indices_organoids = [6]
+indices_organoids = range(1, 9)
 sigmas = [10, 20, 40]  # voxels
+
+def argwhere_int(tup):
+    is_int = [isinstance(x, int) for x in tup] # there will always be one int
+    # index of unique int element:
+    index = is_int.index(True)
+    value = tup[index]
+    other_indices = [i for i in range(3) if i != index]
+    return index, value, other_indices
 
 
 def napari_vectors_from_tensors(
@@ -69,7 +77,7 @@ def napari_vectors_from_tensors(
 
 
 def process_true_strain_maxeig(
-    mask, props, path_to_data, name_folder_midplane, index_organoid, mid_plane_ind
+    mask, props, centroids, sigma, path_to_data, name_folder_midplane, index_organoid, mid_plane_ind, orthogonal_mid_plane_slice
 ):
 
     true_strain_maxeig = np.zeros_like(mask, dtype=np.float32)
@@ -86,6 +94,34 @@ def process_true_strain_maxeig(
         f"{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}.tif",
         true_strain_maxeig[mid_plane_ind],
     )
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}_ortho.tif",
+        true_strain_maxeig[orthogonal_mid_plane_slice],
+    )
+
+    centroids_data = np.zeros_like(mask, dtype=np.float32)
+    centroids_data[
+        centroids[:, 0].astype(int),
+        centroids[:, 1].astype(int),
+        centroids[:, 2].astype(int),
+    ] = 1
+
+    true_strain_maxeig_smoothed = masked_gaussian_smoothing(
+        true_strain_maxeig,
+        sigmas=sigma,
+        mask=mask,
+        mask_for_volume=centroids_data.astype(bool),
+        #n_jobs=-1,
+    )
+
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}_sigma{sigma}.tif",
+        true_strain_maxeig_smoothed[mid_plane_ind],
+    )
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_maxeig/ag{index_organoid}_sigma{sigma}_ortho.tif",
+        true_strain_maxeig_smoothed[orthogonal_mid_plane_slice],
+    )
 
     return true_strain_maxeig
 
@@ -98,6 +134,7 @@ def process_cell_density_sigma(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
 
     centroids_data = np.zeros_like(mask, dtype=np.float32)
@@ -111,12 +148,16 @@ def process_cell_density_sigma(
         centroids_data,
         sigmas=sigma,
         mask=mask,
-        n_jobs=-1,
+        #n_jobs=-1,
     )
 
     tifffile.imwrite(
         f"{path_to_data}/{name_folder_midplane}/cell_density/ag{index_organoid}_sigma{sigma}.tif",
         density[mid_plane_ind],
+    )
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/cell_density/ag{index_organoid}_sigma{sigma}_ortho.tif",
+        density[orthogonal_mid_plane_slice],
     )
 
     return density
@@ -130,6 +171,7 @@ def process_density_gradient(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
     gradient_field = np.gradient(density)
     gradient_field = np.array(gradient_field).transpose(1, 2, 3, 0)
@@ -140,6 +182,11 @@ def process_density_gradient(
     tifffile.imwrite(
         f"{path_to_data}/{name_folder_midplane}/cell_density_gradient_mag/ag{index_organoid}.tif",
         gradient_magnitude_field[mid_plane_ind],
+    )
+
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/cell_density_gradient_mag/ag{index_organoid}_ortho.tif",
+        gradient_magnitude_field[orthogonal_mid_plane_slice],
     )
 
     gradient_on_grid = gradient_field[
@@ -171,6 +218,22 @@ def process_density_gradient(
         angles[zs_mask],
     )
 
+    index, value, coords_indices = argwhere_int(orthogonal_mid_plane_slice)
+    orthos = napari_gradient_on_grid[:,0,index]
+    ortho_mask = np.abs(orthos - value) < 10
+    napari_gradient_on_grid_ortho = napari_gradient_on_grid[ortho_mask]
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/cell_density_gradient/ag{index_organoid}_ortho.npy",
+        napari_gradient_on_grid_ortho[:, :, coords_indices],
+    )
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/cell_density_gradient/ag{index_organoid}_angles_ortho.npy",
+        angles[ortho_mask],
+    )
+
+
     return gradient_field
 
 
@@ -182,15 +245,21 @@ def process_volume_fraction_sigma(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
     volume_data = labels.astype(bool).astype(np.float32)
     volume_fraction = masked_gaussian_smoothing(
-        volume_data, sigmas=sigma, mask=mask, n_jobs=-1
+        volume_data, sigmas=sigma, mask=mask, #n_jobs=-1
     )
 
     tifffile.imwrite(
         f"{path_to_data}/{name_folder_midplane}/volume_fraction/ag{index_organoid}_sigma{sigma}.tif",
         volume_fraction[mid_plane_ind],
+    )
+
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/volume_fraction/ag{index_organoid}_sigma{sigma}_ortho.tif",
+        volume_fraction[orthogonal_mid_plane_slice],
     )
 
 
@@ -203,6 +272,7 @@ def process_nuclear_volume_sigma(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
     centroids_data_volumes = np.zeros_like(mask, dtype=np.float32)
 
@@ -217,12 +287,17 @@ def process_nuclear_volume_sigma(
         sigmas=sigma,
         mask=mask,
         mask_for_volume=centroids_data_volumes.astype(bool),
-        n_jobs=-1,
+        #n_jobs=-1,
     )
 
     tifffile.imwrite(
         f"{path_to_data}/{name_folder_midplane}/nuclear_volume/ag{index_organoid}_sigma{sigma}.tif",
         nuclear_volume_smoothed[mid_plane_ind],
+    )
+
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/nuclear_volume/ag{index_organoid}_sigma{sigma}_ortho.tif",
+        nuclear_volume_smoothed[orthogonal_mid_plane_slice],
     )
 
 
@@ -234,6 +309,7 @@ def process_true_strain(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
     sparse_true_strain_tensors_data = np.zeros((len(props), 3 + 9))
     vectors = np.zeros((len(props), 2, 3))
@@ -261,6 +337,7 @@ def process_true_strain(
     smoothed_true_strain_tensors_data_midplane = (
         smoothed_true_strain_tensors_data.copy()
     )
+
     zs = smoothed_true_strain_tensors_data_midplane[:, 0]
     zs_mask = np.abs(zs - mid_plane_ind) < 5
     smoothed_true_strain_tensors_data_midplane = (
@@ -284,6 +361,34 @@ def process_true_strain(
     np.save(
         f"{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_angles.npy",
         angles_vectors_true_strain_midplane,
+    )
+
+    smoothed_true_strain_tensors_data_ortho = (
+        smoothed_true_strain_tensors_data.copy()
+    )
+
+    index, value, coords_indices = argwhere_int(orthogonal_mid_plane_slice)
+    orthos = smoothed_true_strain_tensors_data_ortho[:,index]
+    ortho_mask = np.abs(orthos - value) < 10
+    smoothed_true_strain_tensors_data_ortho = smoothed_true_strain_tensors_data_ortho[ortho_mask]
+
+    napari_vectors_true_strain_ortho, angles_vectors_true_strain_ortho = (
+        napari_vectors_from_tensors(
+            smoothed_true_strain_tensors_data_ortho,
+            apply_decoupling=False,
+            nematic=True,
+            return_angles=True,
+        )
+    )
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_ortho.npy",
+        napari_vectors_true_strain_ortho[:, :, coords_indices],
+    )
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_angles_ortho.npy",
+        angles_vectors_true_strain_ortho,
     )
 
     ### TRUE STRAIN TENSOR RESAMPLED
@@ -325,6 +430,33 @@ def process_true_strain(
         angles_vectors_true_strain_2d_midplane,
     )
 
+    smoothed_true_strain_tensors_data_2d_ortho = (
+        smoothed_true_strain_tensors_data_2d.copy()
+    )
+
+    orthos = smoothed_true_strain_tensors_data_2d_ortho[:,index]
+    ortho_mask = np.abs(orthos - value) < 10
+    smoothed_true_strain_tensors_data_2d_ortho = smoothed_true_strain_tensors_data_2d_ortho[ortho_mask]
+
+    napari_vectors_true_strain_2d_ortho, angles_vectors_true_strain_2d_ortho = (
+        napari_vectors_from_tensors(
+            smoothed_true_strain_tensors_data_2d_ortho,
+            apply_decoupling=False,
+            nematic=True,
+            return_angles=True,
+        )
+    )
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled_ortho.npy",
+        napari_vectors_true_strain_2d_ortho[:, :, coords_indices],
+    )
+
+    np.save(
+        f"{path_to_data}/{name_folder_midplane}/true_strain_tensor/ag{index_organoid}_sigma{sigma}_resampled_angles_ortho.npy",
+        angles_vectors_true_strain_2d_ortho,
+    )
+
     return napari_vectors_true_strain
 
 
@@ -337,6 +469,7 @@ def process_dotproduct(
     name_folder_midplane,
     index_organoid,
     mid_plane_ind,
+    orthogonal_mid_plane_slice
 ):
 
     centroids_data = np.zeros_like(mask, dtype=np.float32)
@@ -383,7 +516,7 @@ def process_dotproduct(
         sigmas=sigmas[-1] - sigmas[0],
         mask=mask,
         mask_for_volume=centroids_data.astype(bool),
-        n_jobs=-1,
+        #n_jobs=-1,
     )
 
     tifffile.imwrite(
@@ -391,20 +524,36 @@ def process_dotproduct(
         dot_product_map_dense[mid_plane_ind],
     )
 
+    tifffile.imwrite(
+        f"{path_to_data}/{name_folder_midplane}/dot_product_map/ag{index_organoid}_ortho.tif",
+        dot_product_map_dense[orthogonal_mid_plane_slice],
+    )
+
 
 def main_processing_function(index_organoid):
     # mid_plane_ind = int(mask.shape[0] // 2)
     mid_plane_ind = [181, 80, 80, 199, 98, 81, 81, 81][index_organoid - 1]
+    orthogonal_mid_plane_slice = [
+        (slice(None), 190), 
+        (slice(None), 280), 
+        (slice(None), 255), 
+        (slice(None), 308), 
+        (slice(None), 217), 
+        (slice(None), slice(None), 245), 
+        (slice(None), slice(None), 286), 
+        (slice(None), 300)
+    ][index_organoid - 1]
+
 
     save_kwargs = dict(
         path_to_data=path_to_data,
         name_folder_midplane=name_folder_midplane,
         index_organoid=index_organoid,
         mid_plane_ind=mid_plane_ind,
+        orthogonal_mid_plane_slice=orthogonal_mid_plane_slice
     )
 
     mask = tifffile.imread(f"{path_to_data}/ag{index_organoid}_mask.tif")
-
     labels = tifffile.imread(f"{path_to_data}/ag{index_organoid}_norm_labels.tif")
 
     positions_on_grid = (
@@ -428,7 +577,6 @@ def main_processing_function(index_organoid):
         add_tensor_inertia(prop, scale=(1, 1, 1))
         add_true_strain_tensor(prop, scale=(1, 1, 1))
 
-    process_true_strain_maxeig(mask, props, **save_kwargs)
 
     volumes = np.array([prop.area for prop in props])
     centroids = np.array([prop.centroid for prop in props])
@@ -443,6 +591,7 @@ def main_processing_function(index_organoid):
             density_gradient_dp = process_density_gradient(
                 mask, density, positions_on_grid, **save_kwargs
             )
+            process_true_strain_maxeig(mask, props, centroids, sigma, **save_kwargs)
         del density
 
         process_volume_fraction_sigma(mask, labels, sigma, **save_kwargs)
@@ -463,5 +612,7 @@ def main_processing_function(index_organoid):
         mask, density_gradient_dp, true_strain_dp, centroids, **save_kwargs
     )
 
-
-list(map(main_processing_function, tqdm(indices_organoids)))
+# Precompute data for all organoids
+# list(map(main_processing_function, tqdm(indices_organoids)))
+from tqdm.contrib.concurrent import process_map
+process_map(main_processing_function, indices_organoids, max_workers=4)
