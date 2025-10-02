@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     # url of the data
     url = requests.get(
-        "https://zenodo.org/records/14748083/files/zenodo_tapenade_data.zip?download=1",
+        "https://zenodo.org/records/17249972/files/zenodo_tapenade_data.zip?download=1",
         stream=True,
     )
 
