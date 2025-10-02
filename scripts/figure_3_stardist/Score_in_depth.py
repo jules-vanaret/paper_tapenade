@@ -11,6 +11,7 @@ from skimage import io
 from scipy.optimize import linear_sum_assignment
 from pathlib import Path
 from skimage.measure import regionprops
+from tqdm import tqdm
 
 io.use_plugin("pil")
 
@@ -150,6 +151,26 @@ def list_tp_from_iou_matrix(iou_matrix, thresh_IoU):
 
     return np.array(listTP).T
 
+def f1(precision, recall):
+    """
+    Compute the F1 score from precision and recall.
+    
+    Parameters
+    ----------
+    precision : float
+        The precision value.
+    recall : float
+        The recall value.
+    
+    Returns
+    -------
+    f1_score : float
+        The F1 score.
+    """
+    if precision + recall == 0:
+        return 0.0
+    return 2 * (precision * recall) / (precision + recall)
+
 
 folder = Path(__file__).parents[2] / 'data'
 
@@ -164,7 +185,7 @@ Recall = []
 
 thresh_IoU = 0.5
 
-for z in list_z:
+for z in tqdm(list_z):
 
     hoechst = image[z, :, :]
     annotation = tifffile.imread(
@@ -199,11 +220,12 @@ for z in list_z:
     Precision.append(precision)
     Recall.append(recall)
 
-f1_corrected = [(p + r) / 2 for p, r in zip(Precision, Recall)]
+f1_corrected = [f1(p,r) for p, r in zip(Precision, Recall)]
 
 fig, ax = plt.subplots()
 ax.plot(Z, Precision, "o-", color="magenta", label="precision", linewidth=4)
 ax.plot(Z, Recall, "o-", color="cyan", label="recall", linewidth=4)
+ax.plot(Z, f1_corrected, "o-", color="black", label="f1 score", linewidth=4)
 ax.set_xlabel("depth(µm)", fontsize=25)
 ax.set_xticks([0, 50, 100, 150, 200])
 ax.set_yticks([0, 0.25, 0.5, 0.75, 1])

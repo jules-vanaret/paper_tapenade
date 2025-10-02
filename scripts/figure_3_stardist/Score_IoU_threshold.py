@@ -142,6 +142,26 @@ def array_tp(annotation, prediction, listTP):
 
     return array_TP_annotation, array_TP_prediction
 
+def f1(precision, recall):
+    """
+    Compute the F1 score from precision and recall.
+    
+    Parameters
+    ----------
+    precision : float
+        The precision value.
+    recall : float
+        The recall value.
+    
+    Returns
+    -------
+    f1_score : float
+        The F1 score.
+    """
+    if precision + recall == 0:
+        return 0.0
+    return 2 * (precision * recall) / (precision + recall)
+
 
 folder = Path(__file__).parents[2] / 'data'
 Score = []
@@ -163,15 +183,18 @@ colors = [
     "#FFAABB",
 ]
 
+annotation_3D = tifffile.imread(
+    Path(folder) / "3c_segmentation_performances/2_annotation.tif"
+)
+prediction_3D = tifffile.imread(
+    Path(folder) / "3c_segmentation_performances/2_seg.tif"
+)
+
 for ind_thresh, thresh_IoU in enumerate(tqdm(list_IOUs)):
     for indz, z in enumerate(list_z):
         dapi = image[z, 0, :, :]
-        annotation = tifffile.imread(
-            Path(folder) / "3c_segmentation_performances/2_annotation.tif"
-        )[z, :, :]
-        prediction = tifffile.imread(
-            Path(folder) / "3c_segmentation_performances/2_seg.tif"
-        )[z, :, :]
+        annotation = annotation_3D[z, :, :]
+        prediction = prediction_3D[z, :, :]
 
         annotation = relabel_segmentation(annotation)
         prediction = relabel_segmentation(prediction)
@@ -186,10 +209,11 @@ for ind_thresh, thresh_IoU in enumerate(tqdm(list_IOUs)):
             recall, precision, avg_iou = 0, 0, 0
         else:
             nb_tp = len(listTP[0])
-            # array_tp_annotation,array_tp_seg=array_tp(annotation,prediction,listTP)
-            Scores[ind_thresh, indz] = (
-                nb_tp / nb_cells_annotated + nb_tp / nb_cells_predicted
-            ) / 2
+            
+            recall = nb_tp / nb_cells_annotated
+            precision = nb_tp / nb_cells_predicted
+
+            Scores[ind_thresh, indz] = f1(precision, recall)
 
 Scores = Scores.T
 
